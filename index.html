@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Menu — Restoranti Ylberi</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --cream: #FAF7F2; --dark: #1A1410; --accent: #C8622A;
+    --accent-light: #F0956A; --muted: #8B7B6B;
+    --card: #FFFFFF; --border: #EDE8E0; --badge: #FFF3EC;
+  }
+  body { background: var(--cream); color: var(--dark); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; }
+  .header { background: var(--dark); color: var(--cream); padding: 28px 20px 24px; text-align: center; position: sticky; top: 0; z-index: 100; }
+  .header-table { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent-light); margin-bottom: 6px; }
+  .header h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
+  .header-subtitle { font-size: 12px; color: #9A9085; margin-top: 4px; letter-spacing: 1px; }
+  .categories { display: flex; gap: 8px; padding: 16px 20px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--border); background: var(--cream); position: sticky; top: 97px; z-index: 99; }
+  .categories::-webkit-scrollbar { display: none; }
+  .cat-btn { white-space: nowrap; padding: 8px 18px; border-radius: 999px; border: 1.5px solid var(--border); background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+  .cat-btn.active { background: var(--dark); border-color: var(--dark); color: var(--cream); font-weight: 500; }
+  .section { padding: 0 20px; margin-top: 24px; }
+  .section-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; margin-bottom: 14px; }
+  .item-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; transition: box-shadow 0.2s, transform 0.15s; }
+  .item-card:active { transform: scale(0.98); }
+  .item-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+  .item-emoji { font-size: 36px; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; background: var(--badge); border-radius: 12px; flex-shrink: 0; }
+  .item-info { flex: 1; }
+  .item-name { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
+  .item-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+  .item-price { font-size: 15px; font-weight: 500; color: var(--accent); }
+  .add-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--dark); color: var(--cream); border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.15s; }
+  .add-btn:active { transform: scale(0.9); }
+  .qty-control { display: flex; align-items: center; gap: 8px; }
+  .qty-btn { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--border); background: transparent; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; color: var(--dark); }
+  .qty-btn:hover { border-color: var(--dark); }
+  .qty-num { font-size: 14px; font-weight: 500; min-width: 16px; text-align: center; }
+  .cart-bar { position: fixed; bottom: 24px; left: 20px; right: 20px; background: var(--dark); color: var(--cream); border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 32px rgba(0,0,0,0.25); transform: translateY(100px); opacity: 0; transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1); cursor: pointer; z-index: 200; }
+  .cart-bar.visible { transform: translateY(0); opacity: 1; }
+  .cart-left { display: flex; align-items: center; gap: 10px; }
+  .cart-badge { background: var(--accent); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; }
+  .cart-text { font-size: 14px; }
+  .cart-total { font-size: 16px; font-weight: 500; color: var(--accent-light); }
+  .cart-cta { background: var(--accent); color: white; border: none; border-radius: 10px; padding: 10px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .overlay { position: fixed; inset: 0; background: rgba(10,8,5,0.6); z-index: 300; display: none; align-items: flex-end; }
+  .overlay.open { display: flex; }
+  .modal { background: var(--cream); border-radius: 24px 24px 0 0; padding: 28px 24px 40px; width: 100%; max-height: 80vh; overflow-y: auto; }
+  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 4px; }
+  .modal-table { font-size: 12px; color: var(--muted); margin-bottom: 20px; letter-spacing: 1px; text-transform: uppercase; }
+  .order-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .order-item-name { font-weight: 500; }
+  .order-item-qty { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .order-item-price { font-weight: 500; color: var(--accent); }
+  .order-total { display: flex; justify-content: space-between; padding: 16px 0 24px; font-size: 16px; font-weight: 500; }
+  .note-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
+  .note-input { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; background: white; color: var(--dark); resize: none; margin-bottom: 20px; outline: none; transition: border-color 0.2s; }
+  .note-input:focus { border-color: var(--accent); }
+  .confirm-btn { width: 100%; background: var(--accent); color: white; border: none; border-radius: 14px; padding: 17px; font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.15s; }
+  .confirm-btn:active { transform: scale(0.98); background: #A8501F; }
+  .confirm-btn:disabled { background: var(--muted); cursor: not-allowed; }
+  .success-screen { display: none; text-align: center; padding: 20px 0; }
+  .success-icon { font-size: 56px; margin-bottom: 16px; }
+  .success-title { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 8px; }
+  .success-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .loading-screen { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
+  .spacer { height: 100px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-table" id="table-label">Duke u ngarkuar...</div>
+  <h1>Restoranti Ylberi</h1>
+  <div class="header-subtitle">Pejë • Shërbim i shpejtë</div>
+</div>
+
+<div class="categories" id="categories-bar" style="display:none"></div>
+<div id="menu-container"><div class="loading-screen">Duke ngarkuar menynë...</div></div>
+<div class="spacer"></div>
+
+<div class="cart-bar" id="cart-bar" onclick="openModal()">
+  <div class="cart-left">
+    <div class="cart-badge" id="cart-badge">0</div>
+    <span class="cart-text">Shiko porosinë</span>
+  </div>
+  <span class="cart-total" id="cart-total">0.00 €</span>
+  <button class="cart-cta">Porosit</button>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="modal-content"></div>
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Porosia u dërgua!</div>
+      <div class="success-sub">Restoranti e mori porosinë tuaj.<br>Do t'ju shërbejmë sa më shpejt.</div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const SUPABASE_URL = 'https://uydjwcfzmsxikjftyngh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5ZGp3Y2Z6bXN4aWtqZnR5bmdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTc2NjgsImV4cCI6MjA4OTY5MzY2OH0.CfL1KYWcQ0mqzYEft9MOs2079ECYWCyakQKvtxscwX8';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const params = new URLSearchParams(window.location.search);
+const TABLE_NUMBER = parseInt(params.get('table')) || 1;
+document.getElementById('table-label').textContent = `Tavolina ${TABLE_NUMBER}`;
+
+let MENU = [];
+let cart = {};
+let currentCat = 'all';
+const catNames = { fillues:'Fillestarë', kryesore:'Kryesore', pica:'Pica', pije:'Pije', embelsira:'Ëmbëlsira' };
+
+async function loadMenu() {
+  const { data, error } = await supabase
+    .from('menu').select('*').eq('active', true).order('category');
+  if (error) {
+    document.getElementById('menu-container').innerHTML =
+      `<div class="loading-screen">⚠️ Gabim duke ngarkuar menynë. Provo përsëri.</div>`;
+    return;
+  }
+  MENU = data;
+  buildCategoryBar();
+  renderMenu();
+}
+
+function buildCategoryBar() {
+  const cats = [...new Set(MENU.map(i => i.category))];
+  const bar = document.getElementById('categories-bar');
+  bar.style.display = 'flex';
+  bar.innerHTML = `<button class="cat-btn active" onclick="filterCat('all', this)">Të gjitha</button>`;
+  cats.forEach(cat => {
+    bar.innerHTML += `<button class="cat-btn" onclick="filterCat('${cat}', this)">${catNames[cat] || cat}</button>`;
+  });
+}
+
+window.filterCat = function(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMenu();
+};
+
+function renderMenu() {
+  const items = currentCat === 'all' ? MENU : MENU.filter(i => i.category === currentCat);
+  const cats = [...new Set(items.map(i => i.category))];
+  let html = '';
+  cats.forEach(cat => {
+    const catItems = items.filter(i => i.category === cat);
+    html += `<div class="section"><div class="section-title">${catNames[cat] || cat}</div>`;
+    catItems.forEach(item => {
+      const qty = cart[item.id] || 0;
+      html += `<div class="item-card">
+        <div class="item-emoji">${item.emoji || '🍽️'}</div>
+        <div class="item-info">
+          <div class="item-name">${item.name}</div>
+          <div class="item-desc">${item.description || ''}</div>
+        </div>
+        <div class="item-right">
+          <div class="item-price">${parseFloat(item.price).toFixed(2)} €</div>
+          ${qty === 0
+            ? `<button class="add-btn" onclick="addItem(${item.id})">+</button>`
+            : `<div class="qty-control">
+                <button class="qty-btn" onclick="removeItem(${item.id})">−</button>
+                <span class="qty-num">${qty}</span>
+                <button class="qty-btn" onclick="addItem(${item.id})">+</button>
+              </div>`}
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  document.getElementById('menu-container').innerHTML = html ||
+    '<div class="loading-screen">Asnjë artikull aktiv.</div>';
+}
+
+window.addItem = function(id) { cart[id] = (cart[id] || 0) + 1; updateCart(); renderMenu(); };
+window.removeItem = function(id) {
+  if (cart[id] > 1) cart[id]--; else delete cart[id];
+  updateCart(); renderMenu();
+};
+
+function updateCart() {
+  const total = Object.entries(cart).reduce((s, [id, qty]) => {
+    const item = MENU.find(i => i.id == id);
+    return s + parseFloat(item.price) * qty;
+  }, 0);
+  const count = Object.values(cart).reduce((s, q) => s + q, 0);
+  document.getElementById('cart-badge').textContent = count;
+  document.getElementById('cart-total').textContent = total.toFixed(2) + ' €';
+  document.getElementById('cart-bar').classList.toggle('visible', count > 0);
+}
+
+window.openModal = function() {
+  const items = Object.entries(cart).map(([id, qty]) => {
+    const item = MENU.find(i => i.id == id);
+    return { ...item, qty };
+  });
+  const total = items.reduce((s, i) => s + parseFloat(i.price) * i.qty, 0);
+  let html = `<div class="modal-title">Porosia juaj</div>
+    <div class="modal-table">Tavolina ${TABLE_NUMBER}</div>`;
+  items.forEach(i => {
+    html += `<div class="order-item">
+      <div><div class="order-item-name">${i.name}</div><div class="order-item-qty">x${i.qty}</div></div>
+      <div class="order-item-price">${(parseFloat(i.price) * i.qty).toFixed(2)} €</div>
+    </div>`;
+  });
+  html += `<div class="order-total"><span>Total</span><span>${total.toFixed(2)} €</span></div>
+    <div class="note-label">Shënim special (opsional)</div>
+    <textarea class="note-input" id="order-note" rows="2" placeholder="P.sh. pa djathë, pa spec..."></textarea>
+    <button class="confirm-btn" id="confirm-btn" onclick="confirmOrder()">Dërgo porosinë →</button>`;
+  document.getElementById('modal-content').innerHTML = html;
+  document.getElementById('success-screen').style.display = 'none';
+  document.getElementById('modal-content').style.display = 'block';
+  document.getElementById('overlay').classList.add('open');
+};
+
+window.closeModal = function(e) {
+  if (e.target === document.getElementById('overlay'))
+    document.getElementById('overlay').classList.remove('open');
+};
+
+window.confirmOrder = async function() {
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true;
+  btn.textContent = 'Duke dërguar...';
+  const items = Object.entries(cart).map(([id, qty]) => {
+    const item = MENU.find(i => i.id == id);
+    return { id: item.id, name: item.name, qty, price: parseFloat(item.price) };
+  });
+  const total = items.reduce((s, i) => s + i.price * i.qty, 0);
+  const note = document.getElementById('order-note').value.trim();
+  const { error } = await supabase.from('orders').insert({
+    table_number: TABLE_NUMBER, items, total, note, status: 'new'
+  });
+  if (error) {
+    btn.disabled = false;
+    btn.textContent = 'Dërgo porosinë →';
+    alert('Gabim! Provo përsëri.');
+    return;
+  }
+  document.getElementById('modal-content').style.display = 'none';
+  document.getElementById('success-screen').style.display = 'block';
+  cart = {};
+  updateCart();
+  setTimeout(() => {
+    document.getElementById('overlay').classList.remove('open');
+    document.getElementById('modal-content').style.display = 'block';
+    renderMenu();
+  }, 3000);
+};
+
+loadMenu();
+</script>
+</body>
+</html>
