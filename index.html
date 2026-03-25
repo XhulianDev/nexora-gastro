@@ -6,76 +6,238 @@
 <title>Menu — Restoranti Ylberi</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --cream: #FAF7F2; --dark: #1A1410; --accent: #C8622A;
-    --accent-light: #F0956A; --muted: #8B7B6B;
-    --card: #FFFFFF; --border: #EDE8E0; --badge: #FFF3EC;
-  }
-  body { background: var(--cream); color: var(--dark); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; }
-  .header { background: var(--dark); color: var(--cream); padding: 28px 20px 24px; text-align: center; position: sticky; top: 0; z-index: 100; }
-  .header-table { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent-light); margin-bottom: 6px; }
-  .header h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; }
-  .header-subtitle { font-size: 12px; color: #9A9085; margin-top: 4px; letter-spacing: 1px; }
-  .categories { display: flex; gap: 8px; padding: 16px 20px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--border); background: var(--cream); position: sticky; top: 97px; z-index: 99; }
-  .categories::-webkit-scrollbar { display: none; }
-  .cat-btn { white-space: nowrap; padding: 8px 18px; border-radius: 999px; border: 1.5px solid var(--border); background: transparent; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--muted); cursor: pointer; transition: all 0.2s; }
-  .cat-btn.active { background: var(--dark); border-color: var(--dark); color: var(--cream); font-weight: 500; }
-  .section { padding: 0 20px; margin-top: 24px; }
-  .section-title { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; margin-bottom: 14px; }
-  .item-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; transition: box-shadow 0.2s, transform 0.15s; }
-  .item-card:active { transform: scale(0.98); }
-  .item-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
-  .item-emoji { font-size: 36px; width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; background: var(--badge); border-radius: 12px; flex-shrink: 0; }
-  .item-info { flex: 1; }
-  .item-name { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
-  .item-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .item-right { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
-  .item-price { font-size: 15px; font-weight: 500; color: var(--accent); }
-  .add-btn { width: 32px; height: 32px; border-radius: 50%; background: var(--dark); color: var(--cream); border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.15s; }
-  .add-btn:active { transform: scale(0.9); }
-  .qty-control { display: flex; align-items: center; gap: 8px; }
-  .qty-btn { width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--border); background: transparent; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; color: var(--dark); }
-  .qty-btn:hover { border-color: var(--dark); }
-  .qty-num { font-size: 14px; font-weight: 500; min-width: 16px; text-align: center; }
-  .cart-bar { position: fixed; bottom: 24px; left: 20px; right: 20px; background: var(--dark); color: var(--cream); border-radius: 16px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 8px 32px rgba(0,0,0,0.25); transform: translateY(100px); opacity: 0; transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1); cursor: pointer; z-index: 200; }
-  .cart-bar.visible { transform: translateY(0); opacity: 1; }
-  .cart-left { display: flex; align-items: center; gap: 10px; }
-  .cart-badge { background: var(--accent); color: white; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 500; }
-  .cart-text { font-size: 14px; }
-  .cart-total { font-size: 16px; font-weight: 500; color: var(--accent-light); }
-  .cart-cta { background: var(--accent); color: white; border: none; border-radius: 10px; padding: 10px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; }
-  .overlay { position: fixed; inset: 0; background: rgba(10,8,5,0.6); z-index: 300; display: none; align-items: flex-end; }
-  .overlay.open { display: flex; }
-  .modal { background: var(--cream); border-radius: 24px 24px 0 0; padding: 28px 24px 40px; width: 100%; max-height: 80vh; overflow-y: auto; }
-  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 20px; }
-  .modal-title { font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 4px; }
-  .modal-table { font-size: 12px; color: var(--muted); margin-bottom: 20px; letter-spacing: 1px; text-transform: uppercase; }
-  .order-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-  .order-item-name { font-weight: 500; }
-  .order-item-qty { color: var(--muted); font-size: 13px; margin-top: 2px; }
-  .order-item-price { font-weight: 500; color: var(--accent); }
-  .order-total { display: flex; justify-content: space-between; padding: 16px 0 24px; font-size: 16px; font-weight: 500; }
-  .note-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; }
-  .note-input { width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 12px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; background: white; color: var(--dark); resize: none; margin-bottom: 20px; outline: none; transition: border-color 0.2s; }
-  .note-input:focus { border-color: var(--accent); }
-  .confirm-btn { width: 100%; background: var(--accent); color: white; border: none; border-radius: 14px; padding: 17px; font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.15s; }
-  .confirm-btn:active { transform: scale(0.98); background: #A8501F; }
-  .confirm-btn:disabled { background: var(--muted); cursor: not-allowed; }
-  .success-screen { display: none; text-align: center; padding: 20px 0; }
-  .success-icon { font-size: 56px; margin-bottom: 16px; }
-  .success-title { font-family: 'Playfair Display', serif; font-size: 24px; margin-bottom: 8px; }
-  .success-sub { font-size: 14px; color: var(--muted); line-height: 1.6; }
-  .loading-screen { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
-  .spacer { height: 100px; }
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+--bg:#0F0F10;
+--card:#1A1A1D;
+--card-soft:#222226;
+--text:#F5F5F5;
+--muted:#A1A1AA;
+--border:rgba(255,255,255,0.06);
+--accent-gradient:linear-gradient(135deg,#F58529,#DD2A7B,#8134AF,#515BD4);
+--accent-solid:#DD2A7B;
+}
+
+body{
+background:var(--bg);
+color:var(--text);
+font-family:'DM Sans',sans-serif;
+}
+
+.header{
+background:rgba(15,15,16,0.75);
+backdrop-filter:blur(16px);
+padding:26px 20px;
+text-align:center;
+position:sticky;
+top:0;
+z-index:100;
+border-bottom:1px solid var(--border);
+}
+
+.categories{
+display:flex;
+gap:10px;
+padding:14px 20px;
+overflow-x:auto;
+position:sticky;
+top:90px;
+background:var(--bg);
+}
+
+.cat-btn{
+padding:8px 16px;
+border-radius:999px;
+border:1px solid var(--border);
+background:var(--card);
+color:var(--muted);
+cursor:pointer;
+transition:.25s;
+}
+
+.cat-btn.active{
+background:var(--accent-gradient);
+color:white;
+border:none;
+}
+
+.section{
+padding:0 20px;
+margin-top:28px;
+}
+
+.section-title{
+font-family:'Playfair Display',serif;
+margin-bottom:16px;
+text-transform: capitalize;
+}
+
+.item-card{
+background:linear-gradient(145deg,#1A1A1D,#202024);
+border-radius:20px;
+padding:14px;
+margin-bottom:16px;
+display:flex;
+align-items:center;
+gap:14px;
+border:1px solid var(--border);
+transition:.3s;
+position:relative;
+}
+
+.item-card:hover{
+transform:translateY(-4px);
+box-shadow:0 12px 28px rgba(0,0,0,.4);
+}
+
+.item-image{
+width:64px;
+height:64px;
+border-radius:16px;
+background-size:cover;
+background-position:center;
+background-color:#222;
+flex-shrink:0;
+box-shadow:0 4px 12px rgba(0,0,0,0.4);
+}
+
+.item-info{
+flex:1;
+min-width:0;
+}
+
+.item-name{
+font-weight:600;
+margin-bottom:4px;
+font-size:15px;
+}
+
+.item-desc{
+font-size:12px;
+color:var(--muted);
+line-height:1.4;
+}
+
+.item-right{
+display:flex;
+flex-direction:column;
+align-items:flex-end;
+gap:8px;
+}
+
+.item-price{
+color:var(--accent-solid);
+font-weight:600;
+}
+
+.add-btn{
+width:36px;
+height:36px;
+border-radius:50%;
+background:var(--accent-gradient);
+border:none;
+color:white;
+font-size:20px;
+cursor:pointer;
+transition:.2s;
+box-shadow:0 0 14px rgba(221,42,123,.4);
+}
+
+.add-btn:hover{
+transform:scale(1.1);
+}
+
+.add-btn:active{
+transform:scale(.9);
+}
+
+.qty-btn{
+width:28px;
+height:28px;
+border-radius:50%;
+border:1px solid var(--border);
+background:transparent;
+color:white;
+cursor:pointer;
+}
+
+.cart-bar{
+position:fixed;
+bottom:20px;
+left:16px;
+right:16px;
+background:linear-gradient(135deg,#1A1A1D,#222226);
+border-radius:20px;
+padding:16px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+border:1px solid var(--border);
+transform:translateY(100px);
+opacity:0;
+transition:.3s;
+box-shadow:0 10px 30px rgba(0,0,0,.5);
+}
+
+.cart-bar.visible{
+transform:translateY(0);
+opacity:1;
+}
+
+.cart-badge{
+background:var(--accent-solid);
+color:white;
+}
+
+.cart-cta{
+background:var(--accent-gradient);
+border:none;
+border-radius:10px;
+padding:10px 16px;
+color:white;
+cursor:pointer;
+box-shadow:0 0 20px rgba(221,42,123,.4);
+}
+
+.overlay{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.6);
+backdrop-filter:blur(6px);
+display:none;
+align-items:flex-end;
+}
+
+.overlay.open{display:flex}
+
+.modal{
+background:#18181B;
+border-radius:24px 24px 0 0;
+padding:24px;
+width:100%;
+}
+
+.confirm-btn{
+width:100%;
+background:var(--accent-gradient);
+border:none;
+border-radius:16px;
+padding:16px;
+color:white;
+cursor:pointer;
+box-shadow:0 0 25px rgba(221,42,123,.4);
+}
+
+.spacer{height:110px}
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="header-table" id="table-label">Duke u ngarkuar...</div>
-  <h1>Restoranti Ylberi</h1>
-  <div class="header-subtitle">Pejë • Shërbim i shpejtë</div>
+  <div class="header-table" id="table-label">Tavolina --</div>
+  <h1>Urban Bar</h1>
+  <div class="header-subtitle">Mitrovicë • Shërbim i shpejtë</div>
 </div>
 
 <div class="categories" id="categories-bar" style="display:none"></div>
@@ -103,6 +265,10 @@
   </div>
 </div>
 
+<div style="text-align:center; padding:30px 20px; color:var(--muted); font-size:11px; letter-spacing:1px; opacity:0.5;">
+    DIGJITALIZUAR NGA <strong>SMARTMENU</strong>
+</div>
+
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
@@ -117,7 +283,19 @@ document.getElementById('table-label').textContent = `Tavolina ${TABLE_NUMBER}`;
 let MENU = [];
 let cart = {};
 let currentCat = 'all';
-const catNames = { fillues:'Fillestarë', kryesore:'Kryesore', pica:'Pica', pije:'Pije', embelsira:'Ëmbëlsira' };
+const catNames = { 
+  supat: 'Supa', 
+  senduic: 'Sanduiç', 
+  burger: 'Burgera', 
+  rizoto: 'Rizoto', 
+  sallata: 'Sallata', 
+  pasta: 'Pasta', 
+  pica: 'Pica', 
+  pule: 'Mish Pule', 
+  misherat: 'Mishërat', 
+  deti: 'Ushqim Deti', 
+  desert: 'Ëmbëlsira' 
+};
 
 async function loadMenu() {
   const { data, error } = await supabase
@@ -159,7 +337,7 @@ function renderMenu() {
     catItems.forEach(item => {
       const qty = cart[item.id] || 0;
       html += `<div class="item-card">
-        <div class="item-emoji">${item.emoji || '🍽️'}</div>
+        <div class="item-image" style="background-image:url('${item.image || ''}')"></div>
         <div class="item-info">
           <div class="item-name">${item.name}</div>
           <div class="item-desc">${item.description || ''}</div>

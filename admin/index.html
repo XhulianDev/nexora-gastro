@@ -80,11 +80,11 @@
   .btn-add { background: var(--accent); color: white; border: none; border-radius: 10px; padding: 10px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
   .btn-add:hover { background: #A8501F; }
   .menu-table { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-  .menu-table-header { display: grid; grid-template-columns: 44px 1fr 110px 90px 70px 90px; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
-  .menu-row { display: grid; grid-template-columns: 44px 1fr 110px 90px 70px 90px; padding: 14px 16px; border-bottom: 1px solid var(--border); align-items: center; font-size: 14px; transition: background 0.15s; }
+  .menu-table-header { display: grid; grid-template-columns: 60px 1fr 110px 90px 70px 90px; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+  .menu-row { display: grid; grid-template-columns: 60px 1fr 110px 90px 70px 90px; padding: 14px 16px; border-bottom: 1px solid var(--border); align-items: center; font-size: 14px; transition: background 0.15s; }
   .menu-row:last-child { border-bottom: none; }
   .menu-row:hover { background: var(--surface2); }
-  .menu-emoji-cell { font-size: 22px; }
+  .menu-image-cell { width: 40px; height: 40px; border-radius: 8px; background-size: cover; background-position: center; background-color: var(--surface2); border: 1px solid var(--border); }
   .menu-name { font-weight: 500; }
   .menu-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
   .cat-pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
@@ -172,7 +172,7 @@
       </div>
       <div class="menu-table">
         <div class="menu-table-header">
-          <div></div><div>Artikulli</div><div>Kategoria</div><div>Çmimi</div><div>Aktiv</div><div>Veprime</div>
+          <div>Foto</div><div>Artikulli</div><div>Kategoria</div><div>Çmimi</div><div>Aktiv</div><div>Veprime</div>
         </div>
         <div id="menu-rows"><div class="empty-state">Duke ngarkuar...</div></div>
       </div>
@@ -195,14 +195,25 @@
 <div class="form-overlay" id="form-overlay" onclick="closeFormOverlay(event)">
   <div class="form-modal">
     <div class="form-title" id="form-title">Shto artikull</div>
-    <div class="form-row">
-      <div class="form-group"><label class="form-label">Emoji</label><input class="form-input" id="f-emoji" type="text" placeholder="🍕" maxlength="2"></div>
-      <div class="form-group"><label class="form-label">Kategoria</label>
-        <select class="form-select" id="f-cat">
-          <option value="fillues">Fillestarë</option><option value="kryesore">Kryesore</option>
-          <option value="pica">Pica</option><option value="pije">Pije</option><option value="embelsira">Ëmbëlsira</option>
-        </select>
-      </div>
+    <div class="form-group">
+      <label class="form-label">URL e Fotos</label>
+      <input class="form-input" id="f-image" type="text" placeholder="https://linku.com/foto.jpg">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Kategoria</label>
+      <select class="form-select" id="f-cat">
+        <option value="supat">Supa</option>
+        <option value="senduic">Sanduiç</option>
+        <option value="burger">Burgera</option>
+        <option value="rizoto">Rizoto</option>
+        <option value="sallata">Sallata</option>
+        <option value="pasta">Pasta</option>
+        <option value="pica">Pica</option>
+        <option value="pule">Mish Pule</option>
+        <option value="misherat">Mishërat</option>
+        <option value="deti">Ushqim Deti</option>
+        <option value="desert">Ëmbëlsira</option>
+      </select>
     </div>
     <div class="form-group"><label class="form-label">Emri</label><input class="form-input" id="f-name" type="text" placeholder="Qebap i grilluar"></div>
     <div class="form-group"><label class="form-label">Përshkrim</label><input class="form-input" id="f-desc" type="text" placeholder="Mish viçi, me salcë dhe pilave"></div>
@@ -223,7 +234,20 @@ const SUPABASE_URL = 'https://uydjwcfzmsxikjftyngh.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5ZGp3Y2Z6bXN4aWtqZnR5bmdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTc2NjgsImV4cCI6MjA4OTY5MzY2OH0.CfL1KYWcQ0mqzYEft9MOs2079ECYWCyakQKvtxscwX8';
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const catNames = { fillues:'Fillestarë', kryesore:'Kryesore', pica:'Pica', pije:'Pije', embelsira:'Ëmbëlsira' };
+const catNames = { 
+  supat: 'Supa', 
+  senduic: 'Sanduiç', 
+  burger: 'Burgera', 
+  rizoto: 'Rizoto', 
+  sallata: 'Sallata', 
+  pasta: 'Pasta', 
+  pica: 'Pica', 
+  pule: 'Mish Pule', 
+  misherat: 'Mishërat', 
+  deti: 'Ushqim Deti', 
+  desert: 'Ëmbëlsira' 
+};
+
 let ORDERS = [];
 let MENU = [];
 let editingId = null;
@@ -345,11 +369,9 @@ window.confirmDeleteOrder = function(id) {
   });
 };
 
-// MENU — ngarkon të gjitha (active dhe jo-active) për panel
 async function loadMenu() {
   const { data, error } = await supabase.from('menu').select('*').order('category');
   if (error) { showToast('Gabim duke ngarkuar menynë', 'error'); return; }
-  // Shfaq vetëm active=true në panel
   MENU = data.filter(i => i.active !== false);
   renderMenuTable();
 }
@@ -362,7 +384,7 @@ function renderMenuTable() {
   }
   document.getElementById('menu-rows').innerHTML = items.map(item => `
     <div class="menu-row">
-      <div class="menu-emoji-cell">${item.emoji || '🍽️'}</div>
+      <div class="menu-image-cell" style="background-image: url('${item.image || ''}')"></div>
       <div><div class="menu-name">${item.name}</div><div class="menu-desc">${item.description || ''}</div></div>
       <div><span class="cat-pill">${catNames[item.category] || item.category}</span></div>
       <div class="menu-price">${parseFloat(item.price).toFixed(2)} €</div>
@@ -389,13 +411,11 @@ window.toggleItem = async function(id, active) {
   showToast(active ? 'Artikulli u aktivizua' : 'Artikulli u çaktivizua');
 };
 
-// SOFT DELETE — vendos active=false, nuk fshin fizikisht
 window.confirmDeleteItem = function(id) {
   const item = MENU.find(i => i.id === id);
   showDialog('Fshi artikullin?', `"${item?.name}" do të hiqet nga menyja.`, '🗑️', async () => {
     const { error } = await supabase.from('menu').update({ active: false }).eq('id', id);
     if (error) { showToast('Gabim: ' + error.message, 'error'); return; }
-    // Hiq menjëherë nga lista lokale
     MENU = MENU.filter(i => i.id !== id);
     renderMenuTable();
     showToast('Artikulli u fshi');
@@ -406,7 +426,7 @@ window.openAddForm = function() {
   editingId = null;
   document.getElementById('form-title').textContent = 'Shto artikull të ri';
   document.getElementById('save-btn').textContent = 'Shto';
-  ['f-emoji','f-name','f-desc','f-price'].forEach(id => document.getElementById(id).value = '');
+  ['f-image','f-name','f-desc','f-price'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('f-cat').value = 'kryesore';
   document.getElementById('form-overlay').classList.add('open');
 };
@@ -417,7 +437,7 @@ window.openEditForm = function(id) {
   editingId = id;
   document.getElementById('form-title').textContent = 'Ndrysho artikullin';
   document.getElementById('save-btn').textContent = 'Ruaj ndryshimet';
-  document.getElementById('f-emoji').value = item.emoji || '';
+  document.getElementById('f-image').value = item.image || '';
   document.getElementById('f-name').value = item.name;
   document.getElementById('f-desc').value = item.description || '';
   document.getElementById('f-price').value = item.price;
@@ -433,14 +453,16 @@ window.saveItem = async function() {
   const saveBtn = document.getElementById('save-btn');
   saveBtn.disabled = true;
   saveBtn.textContent = 'Duke ruajtur...';
+  
   const data = {
-    emoji: document.getElementById('f-emoji').value.trim() || '🍽️',
+    image: document.getElementById('f-image').value.trim(),
     name,
     description: document.getElementById('f-desc').value.trim(),
     price,
     category: document.getElementById('f-cat').value,
     active: true,
   };
+
   let error;
   if (editingId) {
     ({ error } = await supabase.from('menu').update(data).eq('id', editingId));
