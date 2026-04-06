@@ -1,0 +1,113 @@
+:root {
+    --bg: #0F0E0C; --surface: #1A1917; --border: #2E2C29;
+    --text: #F0EDE8; --muted: #7A7570; --accent: #C8622A;
+}
+body { 
+    background: var(--bg); color: var(--text); 
+    font-family: 'DM Sans', sans-serif; margin: 0; padding: 20px;
+    display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+}
+.header-logo { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--accent); margin-bottom: 30px; text-align: center; }
+
+/* Containeri kryesor me Grid për Laptop */
+.container { 
+    width: 100%; max-width: 1200px; 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
+    gap: 20px; justify-content: center;
+}
+/* Kur është vetëm 1 porosi, e mbajmë të ngushtë në mes */
+.container.single-mode { max-width: 400px; grid-template-columns: 1fr; }
+
+.order-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 24px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    height: fit-content;
+}
+
+/* Statusi Vizual (Progress Bar) */
+.status-visual { 
+    height: 4px; 
+    background: var(--border); 
+    border-radius: 10px; 
+    margin: 30px 0 10px 0; /* Rritur pak hapësira */
+    position: relative; 
+}
+
+.progress-bar { 
+    position: absolute; 
+    left: 0; 
+    top: 0; 
+    height: 100%; 
+    background: var(--accent); 
+    transition: width 0.8s ease; 
+    border-radius: 10px;
+}
+
+/* SIMETRIA E RE */
+.status-labels { 
+    display: flex; 
+    font-size: 10px; 
+    text-transform: uppercase; 
+    width: 100%;
+    position: relative;
+    top: 10px;
+}
+
+.status-labels .label { 
+    flex: 1; /* Çdo etiketë merr saktësisht 1/3 e hapësirës */
+}
+
+.status-labels .label:nth-child(1) { text-align: left; }   /* Majtas */
+.status-labels .label:nth-child(2) { text-align: center; } /* FIX NE MES - Nën Tavolinën */
+.status-labels .label:nth-child(3) { text-align: right; }  /* Djathtas */
+
+.label.active { color: var(--accent); font-weight: 700; }
+
+/* Badges për listën e porosive */
+.badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+.status-new { background: rgba(200,98,42,0.1); color: var(--accent); }
+.status-preparing { background: rgba(232,184,75,0.1); color: #E8B84B; }
+.status-done { background: rgba(76,175,125,0.1); color: #4CAF7D; }
+
+.items-list { border-top: 1px solid var(--border); margin-top: 15px; padding-top: 15px; }
+.item-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
+.total-row { border-top: 1px solid var(--border); margin-top: 10px; padding-top: 10px; display: flex; justify-content: space-between; font-weight: 600; }
+
+.back-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--text);
+    padding: 14px; border-radius: 14px; cursor: pointer; width: 100%; max-width: 400px; margin-top: 30px;
+}
+
+/* Seksioni Kompakt i Totalit */
+.grand-total-bar {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface);
+    border: 1px dashed var(--border); /* Stil si faturë */
+    padding: 15px 25px;
+    border-radius: 16px;
+    margin-top: 10px;
+}
+
+.total-text {
+    font-size: 13px;
+    text-transform: uppercase;
+    color: var(--accent);
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+.total-price {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+}
+
+.total-price span {
+    color: var(--accent);
+    margin-left: 4px;
+}

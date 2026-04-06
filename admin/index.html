@@ -1,496 +1,137 @@
 <!DOCTYPE html>
 <html lang="sq">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel – Urban Bar</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0F0E0C; --surface: #1A1917; --surface2: #242220;
-    --border: #2E2C29; --text: #F0EDE8; --muted: #7A7570;
-    --accent: #C8622A; --accent-light: #F0956A;
-    --green: #4CAF7D; --yellow: #E8B84B; --red: #D95F5F;
-  }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; min-height: 100vh; }
-  .layout { display: flex; min-height: 100vh; }
-  .sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 28px 0; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; flex-shrink: 0; }
-  .sidebar-logo { padding: 0 24px 28px; border-bottom: 1px solid var(--border); }
-  .sidebar-logo h2 { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; }
-  .sidebar-logo p { font-size: 11px; color: var(--muted); margin-top: 3px; letter-spacing: 1px; text-transform: uppercase; }
-  .nav { padding: 20px 12px; flex: 1; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 10px; cursor: pointer; font-size: 14px; color: var(--muted); transition: all 0.18s; margin-bottom: 4px; border: none; background: transparent; width: 100%; text-align: left; font-family: 'DM Sans', sans-serif; }
-  .nav-item:hover { background: var(--surface2); color: var(--text); }
-  .nav-item.active { background: var(--surface2); color: var(--text); font-weight: 500; }
-  .nav-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border); flex-shrink: 0; transition: background 0.18s; }
-  .nav-item.active .nav-dot { background: var(--accent); }
-  .nav-badge { margin-left: auto; background: var(--accent); color: white; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 999px; }
-  .sidebar-footer { padding: 20px 24px; border-top: 1px solid var(--border); font-size: 12px; color: var(--muted); }
-  .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--green); margin-right: 6px; }
-  .main { flex: 1; padding: 32px 28px; overflow-y: auto; }
-  .page { display: none; }
-  .page.active { display: block; }
-  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; }
-  .page-title { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; }
-  .page-sub { font-size: 13px; color: var(--muted); margin-top: 3px; }
-  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
-  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
-  .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-  .stat-value { font-size: 26px; font-weight: 500; }
-  .stat-value.green { color: var(--green); }
-  .stat-value.yellow { color: var(--yellow); }
-  .stat-value.accent { color: var(--accent-light); }
-  .orders-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
-  .order-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.2s; }
-  .order-card.new { border-color: var(--accent); }
-  .order-card.preparing { border-color: var(--yellow); }
-  .order-card.done { border-color: var(--green); opacity: 0.6; }
-  .order-header { padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
-  .order-table { font-size: 15px; font-weight: 500; }
-  .order-time { font-size: 12px; color: var(--muted); }
-  .order-status { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.5px; text-transform: uppercase; }
-  .status-new { background: rgba(200,98,42,0.15); color: var(--accent-light); }
-  .status-preparing { background: rgba(232,184,75,0.15); color: var(--yellow); }
-  .status-done { background: rgba(76,175,125,0.15); color: var(--green); }
-  .order-items { padding: 12px 16px; }
-  .order-line { display: flex; justify-content: space-between; font-size: 13px; padding: 5px 0; }
-  .order-line-qty { color: var(--muted); margin-right: 6px; }
-  .order-line-price { color: var(--muted); }
-  .order-note { margin: 8px 0 4px; padding: 8px 10px; background: var(--surface2); border-radius: 8px; font-size: 12px; color: var(--muted); font-style: italic; }
-  .order-total-row { display: flex; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--border); font-size: 13px; font-weight: 500; }
-  .order-total-price { color: var(--accent-light); }
-  .order-actions { padding: 12px 16px; display: flex; gap: 8px; }
-  .btn { flex: 1; padding: 9px 12px; border-radius: 9px; border: none; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: #A8501F; }
-  .btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-  .btn-outline:hover { border-color: var(--muted); color: var(--text); }
-  .btn-green { background: var(--green); color: #0F1F16; }
-  .btn-green:hover { background: #3D9E68; }
-  .btn-red { background: rgba(217,95,95,0.15); color: var(--red); border: 1px solid rgba(217,95,95,0.3); }
-  .btn-red:hover { background: rgba(217,95,95,0.25); }
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
-  .empty-icon { font-size: 40px; margin-bottom: 12px; }
-  .empty-title { font-size: 16px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
-  .menu-toolbar { display: flex; gap: 10px; margin-bottom: 20px; }
-  .search-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 10px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
-  .search-input:focus { border-color: var(--accent); }
-  .search-input::placeholder { color: var(--muted); }
-  .btn-add { background: var(--accent); color: white; border: none; border-radius: 10px; padding: 10px 18px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: background 0.15s; }
-  .btn-add:hover { background: #A8501F; }
-  .menu-table { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
-  .menu-table-header { display: grid; grid-template-columns: 60px 1fr 110px 90px 70px 90px; padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
-  .menu-row { display: grid; grid-template-columns: 60px 1fr 110px 90px 70px 90px; padding: 14px 16px; border-bottom: 1px solid var(--border); align-items: center; font-size: 14px; transition: background 0.15s; }
-  .menu-row:last-child { border-bottom: none; }
-  .menu-row:hover { background: var(--surface2); }
-  .menu-image-cell { width: 40px; height: 40px; border-radius: 8px; background-size: cover; background-position: center; background-color: var(--surface2); border: 1px solid var(--border); }
-  .menu-name { font-weight: 500; }
-  .menu-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .cat-pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 500; background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
-  .menu-price { color: var(--accent-light); font-weight: 500; }
-  .toggle-switch { position: relative; width: 36px; height: 20px; cursor: pointer; display: block; }
-  .toggle-switch input { display: none; }
-  .toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 10px; transition: background 0.2s; }
-  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: var(--muted); border-radius: 50%; transition: all 0.2s; pointer-events: none; }
-  .toggle-switch input:checked ~ .toggle-track { background: rgba(76,175,125,0.3); }
-  .toggle-switch input:checked ~ .toggle-thumb { left: 19px; background: var(--green); }
-  .menu-actions { display: flex; gap: 6px; }
-  .icon-btn { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
-  .icon-btn:hover { border-color: var(--text); color: var(--text); }
-  .icon-btn.danger:hover { border-color: var(--red); color: var(--red); }
-  .dialog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 600; display: none; align-items: center; justify-content: center; padding: 20px; }
-  .dialog-overlay.open { display: flex; }
-  .dialog-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; width: 100%; max-width: 360px; text-align: center; }
-  .dialog-icon { font-size: 32px; margin-bottom: 12px; }
-  .dialog-title { font-family: 'Playfair Display', serif; font-size: 18px; margin-bottom: 8px; }
-  .dialog-sub { font-size: 13px; color: var(--muted); margin-bottom: 24px; line-height: 1.5; }
-  .dialog-actions { display: flex; gap: 10px; }
-  .dialog-actions .btn { padding: 11px; font-size: 13px; border-radius: 10px; }
-  .form-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 500; display: none; align-items: center; justify-content: center; padding: 20px; }
-  .form-overlay.open { display: flex; }
-  .form-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 28px; width: 100%; max-width: 420px; }
-  .form-title { font-family: 'Playfair Display', serif; font-size: 20px; margin-bottom: 22px; }
-  .form-group { margin-bottom: 16px; }
-  .form-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 7px; display: block; }
-  .form-input, .form-select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
-  .form-input:focus, .form-select:focus { border-color: var(--accent); }
-  .form-select option { background: var(--surface); }
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .form-actions { display: flex; gap: 10px; margin-top: 24px; }
-  .form-actions .btn { flex: 1; padding: 12px; font-size: 14px; border-radius: 11px; }
-  .realtime-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--green); background: rgba(76,175,125,0.1); padding: 5px 12px; border-radius: 999px; border: 1px solid rgba(76,175,125,0.2); }
-  .pulse { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 12px 20px; border-radius: 12px; font-size: 13px; z-index: 700; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
-  .toast.show { opacity: 1; transform: translateY(0); }
-  .toast.success { border-color: var(--green); color: var(--green); }
-  .toast.error { border-color: var(--red); color: var(--red); }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel – Urban Bar</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="layout">
-  <aside class="sidebar">
-    <div class="sidebar-logo">
-      <h2>Restoranti Ylberi</h2>
-      <p>Panel i brendshëm</p>
-    </div>
-    <nav class="nav">
-      <button class="nav-item" id="nav-orders" onclick="showPage('orders', this)">
-        <span class="nav-dot"></span>Porositë
-        <span class="nav-badge" id="new-badge" style="display:none">0</span>
-      </button>
-      <button class="nav-item" id="nav-menu" onclick="showPage('menu', this)">
-        <span class="nav-dot"></span>Menyja
-      </button>
-    </nav>
-    <div class="sidebar-footer"><span class="status-dot"></span>Sistemi aktiv</div>
-  </aside>
-  <main class="main">
-    <div class="page" id="page-orders">
-      <div class="page-header">
-        <div><div class="page-title">Porositë</div><div class="page-sub">Sot — <span id="orders-time"></span></div></div>
-        <div class="realtime-badge"><span class="pulse"></span>Live</div>
-      </div>
-      <div class="stats-row">
-        <div class="stat-card"><div class="stat-label">Të reja</div><div class="stat-value accent" id="stat-new">0</div></div>
-        <div class="stat-card"><div class="stat-label">Në përgatitje</div><div class="stat-value yellow" id="stat-prep">0</div></div>
-        <div class="stat-card"><div class="stat-label">Të gatshme</div><div class="stat-value green" id="stat-done">0</div></div>
-        <div class="stat-card"><div class="stat-label">Të ardhura sot</div><div class="stat-value" id="stat-revenue">0 €</div></div>
-      </div>
-      <div class="orders-grid" id="orders-container">
-        <div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🍽️</div><div class="empty-title">Duke ngarkuar porositë...</div></div>
-      </div>
-    </div>
-    <div class="page" id="page-menu">
-      <div class="page-header">
-        <div><div class="page-title">Menyja</div><div class="page-sub">Menaxho artikujt dhe çmimet</div></div>
-        <button class="btn-add" onclick="openAddForm()">+ Shto artikull</button>
-      </div>
-      <div class="menu-toolbar">
-        <input class="search-input" type="text" placeholder="Kërko artikull..." oninput="filterMenu(this.value)">
-      </div>
-      <div class="menu-table">
-        <div class="menu-table-header">
-          <div>Foto</div><div>Artikulli</div><div>Kategoria</div><div>Çmimi</div><div>Aktiv</div><div>Veprime</div>
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <h2>Urban Bite</h2>
+            <p>Powered by SmartMenu</p>
         </div>
-        <div id="menu-rows"><div class="empty-state">Duke ngarkuar...</div></div>
-      </div>
-    </div>
-  </main>
+        <nav class="nav">
+            <button class="nav-item" id="nav-orders" onclick="showPage('orders', this)">
+                <span class="nav-dot"></span>Porositë
+                <span class="nav-badge" id="new-badge" style="display:none">0</span>
+            </button>
+            <button class="nav-item" id="nav-menu" onclick="showPage('menu', this)">
+                <span class="nav-dot"></span>Menyja
+            </button>
+        </nav>
+        <div class="sidebar-footer"><span class="status-dot"></span>Sistemi aktiv</div>
+    </aside>
+
+    <main class="main">
+        <div class="page" id="page-orders">
+            <div class="page-header">
+                <div><div class="page-title">Porositë</div><div class="page-sub">Sot — <span id="orders-time"></span></div></div>
+                <div class="realtime-badge"><span class="pulse"></span>Live</div>
+            </div>
+            
+            <div id="waiter-calls-container" class="waiter-calls-wrapper"></div>
+
+            <div class="stats-row">
+                <div class="stat-card"><div class="stat-label">Të reja</div><div class="stat-value accent" id="stat-new">0</div></div>
+                <div class="stat-card"><div class="stat-label">Të ardhura sot</div><div class="stat-value" id="stat-revenue">0 €</div></div>
+                <div class="stat-card">
+                    <div class="stat-label">Top 3 Shitjet</div>
+                    <div id="top-sellers-list" style="font-size: 12px; color: var(--green); line-height: 1.4;">Duke llogaritur...</div>
+                </div>
+                <div class="stat-card"><div class="stat-label">Statusi</div><div class="stat-value green" style="font-size:14px">Sistemi LIVE</div></div>
+            </div>
+            <div class="orders-grid" id="orders-container">
+                <div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🍽️</div><div class="empty-title">Duke ngarkuar porositë...</div></div>
+            </div>
+        </div>
+
+        <div class="page" id="page-menu">
+            <div class="page-header">
+                <div><div class="page-title">Menyja</div><div class="page-sub">Menaxho artikujt dhe çmimet</div></div>
+                <button class="btn-add" onclick="openAddForm()">+ Shto artikull</button>
+            </div>
+            <div class="menu-toolbar">
+                <input class="search-input" type="text" placeholder="Kërko artikull..." oninput="filterMenu(this.value)">
+            </div>
+            <div class="menu-table">
+                <div class="menu-table-header">
+                    <div>Foto</div><div>Artikulli</div><div>Kategoria</div><div>Çmimi</div><div>Aktiv</div><div>Veprime</div>
+                </div>
+                <div id="menu-rows"><div class="empty-state">Duke ngarkuar...</div></div>
+            </div>
+        </div>
+    </main>
 </div>
 
 <div class="dialog-overlay" id="dialog-overlay">
-  <div class="dialog-box">
-    <div class="dialog-icon" id="dialog-icon">🗑️</div>
-    <div class="dialog-title" id="dialog-title">A jeni i sigurt?</div>
-    <div class="dialog-sub" id="dialog-sub">Ky veprim nuk mund të kthehet mbrapsht.</div>
-    <div class="dialog-actions">
-      <button class="btn btn-outline" onclick="closeDialog()">Anulo</button>
-      <button class="btn btn-red" id="dialog-confirm-btn">Fshi</button>
+    <div class="dialog-box">
+        <div class="dialog-icon" id="dialog-icon">🗑️</div>
+        <div class="dialog-title" id="dialog-title">A jeni i sigurt?</div>
+        <div class="dialog-sub" id="dialog-sub">Ky veprim nuk mund të kthehet mbrapsht.</div>
+        <div class="dialog-actions">
+            <button class="btn btn-outline" onclick="closeDialog()">Anulo</button>
+            <button class="btn btn-red" id="dialog-confirm-btn">Fshi</button>
+        </div>
     </div>
-  </div>
 </div>
 
-<div class="form-overlay" id="form-overlay" onclick="closeFormOverlay(event)">
-  <div class="form-modal">
-    <div class="form-title" id="form-title">Shto artikull</div>
-    <div class="form-group">
-      <label class="form-label">URL e Fotos</label>
-      <input class="form-input" id="f-image" type="text" placeholder="https://linku.com/foto.jpg">
+<div class="form-overlay" id="form-overlay">
+    <div class="form-modal">
+        <div class="form-title" id="form-title">Shto artikull</div>
+        <div class="form-group">
+            <label class="form-label">URL e Fotos</label>
+            <input class="form-input" id="f-image" type="text" placeholder="https://linku.com/foto.jpg">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Kategoria</label>
+            <select class="form-select" id="f-cat">
+                <option value="supat">Supa</option>
+                <option value="senduic">Sanduiç</option>
+                <option value="burger">Burgera</option>
+                <option value="rizoto">Rizoto</option>
+                <option value="sallata">Sallata</option>
+                <option value="pasta">Pasta</option>
+                <option value="pica">Pica</option>
+                <option value="pule">Mish Pule</option>
+                <option value="misherat">Mishërat</option>
+                <option value="deti">Ushqim Deti</option>
+                <option value="desert">Ëmbëlsira</option>
+            </select>
+        </div>
+        <div class="form-group"><label class="form-label">Emri</label><input class="form-input" id="f-name" type="text"></div>
+        <div class="form-group"><label class="form-label">Përshkrim</label><input class="form-input" id="f-desc" type="text"></div>
+        <div class="form-group"><label class="form-label">Çmimi (€)</label><input class="form-input" id="f-price" type="number" step="0.10"></div>
+        <div class="form-actions">
+            <button class="btn btn-outline" onclick="closeForm()">Anulo</button>
+            <button class="btn btn-primary" onclick="saveItem()">Ruaj</button>
+        </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Kategoria</label>
-      <select class="form-select" id="f-cat">
-        <option value="supat">Supa</option>
-        <option value="senduic">Sanduiç</option>
-        <option value="burger">Burgera</option>
-        <option value="rizoto">Rizoto</option>
-        <option value="sallata">Sallata</option>
-        <option value="pasta">Pasta</option>
-        <option value="pica">Pica</option>
-        <option value="pule">Mish Pule</option>
-        <option value="misherat">Mishërat</option>
-        <option value="deti">Ushqim Deti</option>
-        <option value="desert">Ëmbëlsira</option>
-      </select>
+</div>
+
+<div class="dialog-overlay" id="call-details-overlay">
+    <div class="dialog-box" style="max-width: 400px; text-align: left;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 16px;">
+            <div class="dialog-title" style="margin: 0;">Thirrje: Tavolina <span id="call-table-num"></span></div>
+            <div style="font-size: 24px;">🔔</div>
+        </div>
+        <div style="margin-bottom: 24px;">
+            <div style="font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Porosia Aktive</div>
+            <div id="call-order-items" style="background: var(--surface2); padding: 12px; border-radius: 10px; font-size: 14px; max-height: 200px; overflow-y: auto;">
+                </div>
+        </div>
+        <div class="dialog-actions">
+            <button class="btn btn-outline" onclick="closeCallDetails()">Anulo</button>
+            <button class="btn btn-primary" onclick="resolveActiveCall()">Mbyll Thirrjen</button>
+        </div>
     </div>
-    <div class="form-group"><label class="form-label">Emri</label><input class="form-input" id="f-name" type="text" placeholder="Qebap i grilluar"></div>
-    <div class="form-group"><label class="form-label">Përshkrim</label><input class="form-input" id="f-desc" type="text" placeholder="Mish viçi, me salcë dhe pilave"></div>
-    <div class="form-group"><label class="form-label">Çmimi (€)</label><input class="form-input" id="f-price" type="number" step="0.10" min="0" placeholder="8.50"></div>
-    <div class="form-actions">
-      <button class="btn btn-outline" onclick="closeForm()">Anulo</button>
-      <button class="btn btn-primary" id="save-btn" onclick="saveItem()">Ruaj</button>
-    </div>
-  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
-const SUPABASE_URL = 'https://uydjwcfzmsxikjftyngh.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5ZGp3Y2Z6bXN4aWtqZnR5bmdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTc2NjgsImV4cCI6MjA4OTY5MzY2OH0.CfL1KYWcQ0mqzYEft9MOs2079ECYWCyakQKvtxscwX8';
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-const catNames = { 
-  supat: 'Supa', 
-  senduic: 'Sanduiç', 
-  burger: 'Burgera', 
-  rizoto: 'Rizoto', 
-  sallata: 'Sallata', 
-  pasta: 'Pasta', 
-  pica: 'Pica', 
-  pule: 'Mish Pule', 
-  misherat: 'Mishërat', 
-  deti: 'Ushqim Deti', 
-  desert: 'Ëmbëlsira' 
-};
-
-let ORDERS = [];
-let MENU = [];
-let editingId = null;
-let searchTerm = '';
-
-function showToast(msg, type = 'success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = `toast ${type} show`;
-  setTimeout(() => { t.className = 'toast'; }, 2500);
-}
-
-let dialogCallback = null;
-function showDialog(title, sub, icon, callback) {
-  document.getElementById('dialog-title').textContent = title;
-  document.getElementById('dialog-sub').textContent = sub;
-  document.getElementById('dialog-icon').textContent = icon;
-  dialogCallback = callback;
-  document.getElementById('dialog-overlay').classList.add('open');
-}
-window.closeDialog = function() {
-  document.getElementById('dialog-overlay').classList.remove('open');
-  dialogCallback = null;
-};
-document.getElementById('dialog-confirm-btn').addEventListener('click', () => {
-  if (dialogCallback) dialogCallback();
-  closeDialog();
-});
-
-function updateTime() {
-  document.getElementById('orders-time').textContent =
-    new Date().toLocaleTimeString('sq-AL', { hour:'2-digit', minute:'2-digit' });
-}
-updateTime();
-setInterval(updateTime, 30000);
-
-window.showPage = function(name, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  btn.classList.add('active');
-  localStorage.setItem('activePage', name);
-  if (name === 'menu') loadMenu();
-};
-
-function restorePage() {
-  const saved = localStorage.getItem('activePage') || 'orders';
-  const btn = document.getElementById('nav-' + saved);
-  if (btn) showPage(saved, btn);
-}
-
-async function loadOrders() {
-  const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-  if (error) { showToast('Gabim duke ngarkuar porositë', 'error'); return; }
-  ORDERS = data;
-  renderOrders();
-}
-
-supabase.channel('orders-realtime')
-  .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
-    if (payload.eventType === 'INSERT') { ORDERS.unshift(payload.new); showToast(`🔔 Porosi e re — Tavolina ${payload.new.table_number}`); }
-    else if (payload.eventType === 'UPDATE') { const idx = ORDERS.findIndex(o => o.id === payload.new.id); if (idx !== -1) ORDERS[idx] = payload.new; }
-    else if (payload.eventType === 'DELETE') { ORDERS = ORDERS.filter(o => o.id !== payload.old.id); }
-    renderOrders();
-  }).subscribe();
-
-function renderOrders() {
-  const active = ORDERS.filter(o => o.status !== 'done');
-  const done = ORDERS.filter(o => o.status === 'done');
-  const sorted = [...active, ...done];
-  const newCount = ORDERS.filter(o => o.status === 'new').length;
-  const prepCount = ORDERS.filter(o => o.status === 'preparing').length;
-  const doneCount = ORDERS.filter(o => o.status === 'done').length;
-  const revenue = ORDERS.reduce((s, o) => s + parseFloat(o.total || 0), 0);
-  document.getElementById('stat-new').textContent = newCount;
-  document.getElementById('stat-prep').textContent = prepCount;
-  document.getElementById('stat-done').textContent = doneCount;
-  document.getElementById('stat-revenue').textContent = revenue.toFixed(2) + ' €';
-  const badge = document.getElementById('new-badge');
-  badge.textContent = newCount;
-  badge.style.display = newCount > 0 ? '' : 'none';
-  if (sorted.length === 0) {
-    document.getElementById('orders-container').innerHTML =
-      `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🍽️</div><div class="empty-title">Asnjë porosi ende</div></div>`;
-    return;
-  }
-  const statusLabel = { new:'E re', preparing:'Në përgatitje', done:'E gatshme' };
-  const statusClass = { new:'status-new', preparing:'status-preparing', done:'status-done' };
-  document.getElementById('orders-container').innerHTML = sorted.map(order => {
-    const time = new Date(order.created_at).toLocaleTimeString('sq-AL', { hour:'2-digit', minute:'2-digit' });
-    const items = Array.isArray(order.items) ? order.items : JSON.parse(order.items || '[]');
-    const itemsHtml = items.map(i => `<div class="order-line"><span><span class="order-line-qty">x${i.qty} </span>${i.name}</span><span class="order-line-price">${(i.price * i.qty).toFixed(2)} €</span></div>`).join('');
-    const noteHtml = order.note ? `<div class="order-note">📝 ${order.note}</div>` : '';
-    let actionsHtml = '';
-    if (order.status === 'new') {
-      actionsHtml = `<button class="btn btn-primary" onclick="setStatus(${order.id},'preparing')">Fillo përgatitjen</button><button class="btn btn-outline" onclick="setStatus(${order.id},'done')">Gati</button><button class="btn btn-red" onclick="confirmDeleteOrder(${order.id})">Fshi</button>`;
-    } else if (order.status === 'preparing') {
-      actionsHtml = `<button class="btn btn-green" onclick="setStatus(${order.id},'done')">✓ E gatshme</button><button class="btn btn-red" onclick="confirmDeleteOrder(${order.id})">Fshi</button>`;
-    } else {
-      actionsHtml = `<button class="btn btn-outline" onclick="confirmDeleteOrder(${order.id})">Fshi historinë</button>`;
-    }
-    return `<div class="order-card ${order.status}"><div class="order-header"><div><div class="order-table">Tavolina ${order.table_number}</div><div class="order-time">${time}</div></div><span class="order-status ${statusClass[order.status]}">${statusLabel[order.status]}</span></div><div class="order-items">${itemsHtml}${noteHtml}</div><div class="order-total-row"><span>Total</span><span class="order-total-price">${parseFloat(order.total).toFixed(2)} €</span></div><div class="order-actions">${actionsHtml}</div></div>`;
-  }).join('');
-}
-
-window.setStatus = async function(id, status) {
-  const { error } = await supabase.from('orders').update({ status }).eq('id', id);
-  if (error) showToast('Gabim duke ndryshuar statusin', 'error');
-};
-
-window.confirmDeleteOrder = function(id) {
-  const order = ORDERS.find(o => o.id === id);
-  showDialog('Fshi porosinë?', `Porosia e Tavolinës ${order?.table_number} do të fshihet.`, '🗑️', async () => {
-    const { error } = await supabase.from('orders').delete().eq('id', id);
-    if (error) { showToast('Gabim: ' + error.message, 'error'); return; }
-    ORDERS = ORDERS.filter(o => o.id !== id);
-    renderOrders();
-    showToast('Porosia u fshi');
-  });
-};
-
-async function loadMenu() {
-  const { data, error } = await supabase.from('menu').select('*').order('category');
-  if (error) { showToast('Gabim duke ngarkuar menynë', 'error'); return; }
-  MENU = data.filter(i => i.active !== false);
-  renderMenuTable();
-}
-
-function renderMenuTable() {
-  const items = MENU.filter(i => !searchTerm || i.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  if (items.length === 0) {
-    document.getElementById('menu-rows').innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-title">Nuk u gjet asgjë</div></div>`;
-    return;
-  }
-  document.getElementById('menu-rows').innerHTML = items.map(item => `
-    <div class="menu-row">
-      <div class="menu-image-cell" style="background-image: url('${item.image || ''}')"></div>
-      <div><div class="menu-name">${item.name}</div><div class="menu-desc">${item.description || ''}</div></div>
-      <div><span class="cat-pill">${catNames[item.category] || item.category}</span></div>
-      <div class="menu-price">${parseFloat(item.price).toFixed(2)} €</div>
-      <div>
-        <label class="toggle-switch">
-          <input type="checkbox" ${item.active ? 'checked' : ''} onchange="toggleItem(${item.id}, this.checked)">
-          <div class="toggle-track"></div><div class="toggle-thumb"></div>
-        </label>
-      </div>
-      <div class="menu-actions">
-        <button class="icon-btn" onclick="openEditForm(${item.id})" title="Ndrysho">✎</button>
-        <button class="icon-btn danger" onclick="confirmDeleteItem(${item.id})" title="Fshi">✕</button>
-      </div>
-    </div>`).join('');
-}
-
-window.filterMenu = function(val) { searchTerm = val; renderMenuTable(); };
-
-window.toggleItem = async function(id, active) {
-  const { error } = await supabase.from('menu').update({ active }).eq('id', id);
-  if (error) { showToast('Gabim', 'error'); return; }
-  const item = MENU.find(i => i.id === id);
-  if (item) item.active = active;
-  showToast(active ? 'Artikulli u aktivizua' : 'Artikulli u çaktivizua');
-};
-
-window.confirmDeleteItem = function(id) {
-  const item = MENU.find(i => i.id === id);
-  showDialog('Fshi artikullin?', `"${item?.name}" do të hiqet nga menyja.`, '🗑️', async () => {
-    const { error } = await supabase.from('menu').update({ active: false }).eq('id', id);
-    if (error) { showToast('Gabim: ' + error.message, 'error'); return; }
-    MENU = MENU.filter(i => i.id !== id);
-    renderMenuTable();
-    showToast('Artikulli u fshi');
-  });
-};
-
-window.openAddForm = function() {
-  editingId = null;
-  document.getElementById('form-title').textContent = 'Shto artikull të ri';
-  document.getElementById('save-btn').textContent = 'Shto';
-  ['f-image','f-name','f-desc','f-price'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('f-cat').value = 'kryesore';
-  document.getElementById('form-overlay').classList.add('open');
-};
-
-window.openEditForm = function(id) {
-  const item = MENU.find(i => i.id === id);
-  if (!item) return;
-  editingId = id;
-  document.getElementById('form-title').textContent = 'Ndrysho artikullin';
-  document.getElementById('save-btn').textContent = 'Ruaj ndryshimet';
-  document.getElementById('f-image').value = item.image || '';
-  document.getElementById('f-name').value = item.name;
-  document.getElementById('f-desc').value = item.description || '';
-  document.getElementById('f-price').value = item.price;
-  document.getElementById('f-cat').value = item.category;
-  document.getElementById('form-overlay').classList.add('open');
-};
-
-window.saveItem = async function() {
-  const name = document.getElementById('f-name').value.trim();
-  const price = parseFloat(document.getElementById('f-price').value);
-  if (!name) { showToast('Plotëso emrin', 'error'); return; }
-  if (isNaN(price) || price < 0) { showToast('Plotëso çmimin saktë', 'error'); return; }
-  const saveBtn = document.getElementById('save-btn');
-  saveBtn.disabled = true;
-  saveBtn.textContent = 'Duke ruajtur...';
-  
-  const data = {
-    image: document.getElementById('f-image').value.trim(),
-    name,
-    description: document.getElementById('f-desc').value.trim(),
-    price,
-    category: document.getElementById('f-cat').value,
-    active: true,
-  };
-
-  let error;
-  if (editingId) {
-    ({ error } = await supabase.from('menu').update(data).eq('id', editingId));
-    if (!error) {
-      const idx = MENU.findIndex(i => i.id === editingId);
-      if (idx !== -1) MENU[idx] = { ...MENU[idx], ...data };
-      renderMenuTable();
-    }
-  } else {
-    let newItem;
-    ({ data: newItem, error } = await supabase.from('menu').insert(data).select().single());
-    if (!error && newItem) {
-      MENU.push(newItem);
-      renderMenuTable();
-    }
-  }
-  saveBtn.disabled = false;
-  saveBtn.textContent = editingId ? 'Ruaj ndryshimet' : 'Shto';
-  if (error) { showToast('Gabim: ' + error.message, 'error'); return; }
-  document.getElementById('form-overlay').classList.remove('open');
-  showToast(editingId ? 'Artikulli u përditësua ✓' : 'Artikulli u shtua ✓');
-};
-
-window.closeForm = function() { document.getElementById('form-overlay').classList.remove('open'); };
-window.closeFormOverlay = function(e) { if (e.target === document.getElementById('form-overlay')) closeForm(); };
-
-restorePage();
-loadOrders();
-</script>
+<script type="module" src="app.js"></script>
 </body>
 </html>
