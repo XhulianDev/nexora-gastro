@@ -1,137 +1,235 @@
 <!DOCTYPE html>
 <html lang="sq">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel – Urban Bar</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel – Urban Bar</title>
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div class="layout">
+  <div class="layout">
     <aside class="sidebar">
-        <div class="sidebar-logo">
-            <h2>Urban Bite</h2>
-            <p>Powered by SmartMenu</p>
-        </div>
-        <nav class="nav">
-            <button class="nav-item" id="nav-orders" onclick="showPage('orders', this)">
-                <span class="nav-dot"></span>Porositë
-                <span class="nav-badge" id="new-badge" style="display:none">0</span>
-            </button>
-            <button class="nav-item" id="nav-menu" onclick="showPage('menu', this)">
-                <span class="nav-dot"></span>Menyja
-            </button>
-        </nav>
-        <div class="sidebar-footer"><span class="status-dot"></span>Sistemi aktiv</div>
+      <div class="sidebar-logo">
+        <h2>Urban Bite</h2>
+        <p>Powered by SmartMenu</p>
+      </div>
+
+      <nav class="nav" aria-label="Navigimi kryesor">
+        <button
+          class="nav-item"
+          id="nav-orders"
+          type="button"
+          data-action="navigate"
+          data-page="orders"
+        >
+          <span class="nav-dot"></span>
+          Porositë
+          <span class="nav-badge" id="new-badge">0</span>
+        </button>
+
+        <button
+          class="nav-item"
+          id="nav-menu"
+          type="button"
+          data-action="navigate"
+          data-page="menu"
+        >
+          <span class="nav-dot"></span>
+          Menyja
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <span class="status-dot"></span>Sistemi aktiv
+      </div>
     </aside>
 
     <main class="main">
-        <div class="page" id="page-orders">
-            <div class="page-header">
-                <div><div class="page-title">Porositë</div><div class="page-sub">Sot — <span id="orders-time"></span></div></div>
-                <div class="realtime-badge"><span class="pulse"></span>Live</div>
-            </div>
-            
-            <div id="waiter-calls-container" class="waiter-calls-wrapper"></div>
+      <section class="page" id="page-orders">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Porositë</div>
+            <div class="page-sub">Sot — <span id="orders-time"></span></div>
+          </div>
 
-            <div class="stats-row">
-                <div class="stat-card"><div class="stat-label">Të reja</div><div class="stat-value accent" id="stat-new">0</div></div>
-                <div class="stat-card"><div class="stat-label">Të ardhura sot</div><div class="stat-value" id="stat-revenue">0 €</div></div>
-                <div class="stat-card">
-                    <div class="stat-label">Top 3 Shitjet</div>
-                    <div id="top-sellers-list" style="font-size: 12px; color: var(--green); line-height: 1.4;">Duke llogaritur...</div>
-                </div>
-                <div class="stat-card"><div class="stat-label">Statusi</div><div class="stat-value green" style="font-size:14px">Sistemi LIVE</div></div>
-            </div>
-            <div class="orders-grid" id="orders-container">
-                <div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🍽️</div><div class="empty-title">Duke ngarkuar porositë...</div></div>
-            </div>
+          <div class="realtime-badge">
+            <span class="pulse"></span>Live
+          </div>
         </div>
 
-        <div class="page" id="page-menu">
-            <div class="page-header">
-                <div><div class="page-title">Menyja</div><div class="page-sub">Menaxho artikujt dhe çmimet</div></div>
-                <button class="btn-add" onclick="openAddForm()">+ Shto artikull</button>
-            </div>
-            <div class="menu-toolbar">
-                <input class="search-input" type="text" placeholder="Kërko artikull..." oninput="filterMenu(this.value)">
-            </div>
-            <div class="menu-table">
-                <div class="menu-table-header">
-                    <div>Foto</div><div>Artikulli</div><div>Kategoria</div><div>Çmimi</div><div>Aktiv</div><div>Veprime</div>
-                </div>
-                <div id="menu-rows"><div class="empty-state">Duke ngarkuar...</div></div>
-            </div>
+        <div id="waiter-calls-container" class="waiter-calls-grid"></div>
+
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-label">Të reja</div>
+            <div class="stat-value accent" id="stat-new">0</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Të ardhura sot</div>
+            <div class="stat-value" id="stat-revenue">0 €</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Top 3 Shitjet</div>
+            <div id="top-sellers-list" class="top-sellers">Duke llogaritur...</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Statusi</div>
+            <div class="stat-value stat-value--small stat-value--green">Sistemi LIVE</div>
+          </div>
         </div>
+
+        <div class="orders-grid" id="orders-container">
+          <div class="empty-state empty-state--full">
+            <div class="empty-icon">🍽️</div>
+            <div class="empty-title">Duke ngarkuar porositë...</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-menu">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Menyja</div>
+            <div class="page-sub">Menaxho artikujt dhe çmimet</div>
+          </div>
+
+          <button
+            class="btn-add"
+            id="open-add-form-btn"
+            type="button"
+            data-action="open-add-form"
+          >
+            + Shto artikull
+          </button>
+        </div>
+
+        <div class="menu-toolbar">
+          <input
+            class="search-input"
+            id="menu-search-input"
+            type="text"
+            placeholder="Kërko artikull..."
+            autocomplete="off"
+          />
+        </div>
+
+        <div class="menu-table">
+          <div class="menu-table-header">
+            <div>Foto</div>
+            <div>Artikulli</div>
+            <div>Kategoria</div>
+            <div>Çmimi</div>
+            <div>Aktiv</div>
+            <div>Veprime</div>
+          </div>
+
+          <div id="menu-rows">
+            <div class="empty-state">Duke ngarkuar...</div>
+          </div>
+        </div>
+      </section>
     </main>
-</div>
+  </div>
 
-<div class="dialog-overlay" id="dialog-overlay">
-    <div class="dialog-box">
-        <div class="dialog-icon" id="dialog-icon">🗑️</div>
-        <div class="dialog-title" id="dialog-title">A jeni i sigurt?</div>
-        <div class="dialog-sub" id="dialog-sub">Ky veprim nuk mund të kthehet mbrapsht.</div>
-        <div class="dialog-actions">
-            <button class="btn btn-outline" onclick="closeDialog()">Anulo</button>
-            <button class="btn btn-red" id="dialog-confirm-btn">Fshi</button>
-        </div>
+  <div class="dialog-overlay" id="dialog-overlay" aria-hidden="true">
+    <div class="dialog-box" role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+      <div class="dialog-icon" id="dialog-icon">🗑️</div>
+      <div class="dialog-title" id="dialog-title">A jeni i sigurt?</div>
+      <div class="dialog-sub" id="dialog-sub">Ky veprim nuk mund të kthehet mbrapsht.</div>
+      <div class="dialog-actions">
+        <button class="btn btn-outline" id="dialog-cancel-btn" type="button">Anulo</button>
+        <button class="btn btn-red" id="dialog-confirm-btn" type="button">Konfirmo</button>
+      </div>
     </div>
-</div>
+  </div>
 
-<div class="form-overlay" id="form-overlay">
-    <div class="form-modal">
-        <div class="form-title" id="form-title">Shto artikull</div>
-        <div class="form-group">
-            <label class="form-label">URL e Fotos</label>
-            <input class="form-input" id="f-image" type="text" placeholder="https://linku.com/foto.jpg">
-        </div>
-        <div class="form-group">
-            <label class="form-label">Kategoria</label>
-            <select class="form-select" id="f-cat">
-                <option value="supat">Supa</option>
-                <option value="senduic">Sanduiç</option>
-                <option value="burger">Burgera</option>
-                <option value="rizoto">Rizoto</option>
-                <option value="sallata">Sallata</option>
-                <option value="pasta">Pasta</option>
-                <option value="pica">Pica</option>
-                <option value="pule">Mish Pule</option>
-                <option value="misherat">Mishërat</option>
-                <option value="deti">Ushqim Deti</option>
-                <option value="desert">Ëmbëlsira</option>
-            </select>
-        </div>
-        <div class="form-group"><label class="form-label">Emri</label><input class="form-input" id="f-name" type="text"></div>
-        <div class="form-group"><label class="form-label">Përshkrim</label><input class="form-input" id="f-desc" type="text"></div>
-        <div class="form-group"><label class="form-label">Çmimi (€)</label><input class="form-input" id="f-price" type="number" step="0.10"></div>
-        <div class="form-actions">
-            <button class="btn btn-outline" onclick="closeForm()">Anulo</button>
-            <button class="btn btn-primary" onclick="saveItem()">Ruaj</button>
-        </div>
+  <div class="form-overlay" id="form-overlay" aria-hidden="true">
+    <div class="form-modal" role="dialog" aria-modal="true" aria-labelledby="form-title">
+      <div class="form-title" id="form-title">Shto artikull</div>
+
+      <div class="form-group">
+        <label class="form-label" for="f-image">URL e Fotos</label>
+        <input class="form-input" id="f-image" type="url" placeholder="https://example.com/photo.jpg" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="f-cat">Kategoria</label>
+        <select class="form-select" id="f-cat">
+          <option value="supat">Supa</option>
+          <option value="senduic">Sanduiç</option>
+          <option value="burger">Burgera</option>
+          <option value="rizoto">Rizoto</option>
+          <option value="sallata">Sallata</option>
+          <option value="pasta">Pasta</option>
+          <option value="pica">Pica</option>
+          <option value="pule">Mish Pule</option>
+          <option value="misherat">Mishërat</option>
+          <option value="deti">Ushqim Deti</option>
+          <option value="desert">Ëmbëlsira</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="f-name">Emri</label>
+        <input class="form-input" id="f-name" type="text" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="f-desc">Përshkrim</label>
+        <input class="form-input" id="f-desc" type="text" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="f-price">Çmimi (€)</label>
+        <input class="form-input" id="f-price" type="number" step="0.10" min="0" />
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-outline" id="form-cancel-btn" type="button">Anulo</button>
+        <button class="btn btn-primary" id="save-btn" type="button">Ruaj</button>
+      </div>
     </div>
-</div>
+  </div>
 
-<div class="dialog-overlay" id="call-details-overlay">
-    <div class="dialog-box" style="max-width: 400px; text-align: left;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 16px;">
-            <div class="dialog-title" style="margin: 0;">Thirrje: Tavolina <span id="call-table-num"></span></div>
-            <div style="font-size: 24px;">🔔</div>
+  <div class="dialog-overlay" id="call-details-overlay" aria-hidden="true">
+    <div class="dialog-box dialog-box--wide dialog-box--left" role="dialog" aria-modal="true" aria-labelledby="call-table-title">
+      <div class="call-details-header">
+        <div class="dialog-title" id="call-table-title">
+          Thirrje: Tavolina <span id="call-table-num"></span>
         </div>
-        <div style="margin-bottom: 24px;">
-            <div style="font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Porosia Aktive</div>
-            <div id="call-order-items" style="background: var(--surface2); padding: 12px; border-radius: 10px; font-size: 14px; max-height: 200px; overflow-y: auto;">
-                </div>
-        </div>
-        <div class="dialog-actions">
-            <button class="btn btn-outline" onclick="closeCallDetails()">Anulo</button>
-            <button class="btn btn-primary" onclick="resolveActiveCall()">Mbyll Thirrjen</button>
-        </div>
+        <span aria-hidden="true">🔔</span>
+      </div>
+
+      <div class="call-details-body">
+        <div class="form-label">Porosia Aktive</div>
+        <div id="call-order-items" class="call-order-list"></div>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="btn btn-outline" id="call-details-cancel-btn" type="button">Anulo</button>
+        <button class="btn btn-primary" id="resolve-call-btn" type="button">Mbyll Thirrjen</button>
+      </div>
     </div>
-</div>
+  </div>
 
-<div class="toast" id="toast"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script type="module" src="app.js"></script>
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

@@ -1,20 +1,46 @@
 <!DOCTYPE html>
 <html lang="sq">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statusi i Porosisë – Urban Bite</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statusi i Porosisë – Urban Bite</title>
+
+  <link
+    rel="preconnect"
+    href="https://fonts.googleapis.com"
+  />
+  <link
+    rel="preconnect"
+    href="https://fonts.gstatic.com"
+    crossorigin
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <button
+    id="waiter-btn"
+    class="waiter-btn"
+    type="button"
+    hidden
+  >
+    🔔 Kamarieri
+  </button>
 
+  <header class="page-header">
     <div class="header-logo">Urban Bite</div>
-    
-    <div id="main-content" class="container"></div>
+  </header>
 
-    <button id="btn-back" class="back-btn">← Kthehu te Menyja</button>
+  <main id="main-content" class="container"></main>
 
-    <script type="module" src="app.js"></script>
+  <button id="btn-back" class="back-btn" type="button">
+    ← Kthehu te Menyja
+  </button>
+
+  <script type="module" src="js/app.js"></script>
 </body>
 </html>

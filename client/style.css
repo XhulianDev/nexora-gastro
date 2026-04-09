@@ -1,0 +1,728 @@
+/* ==========================================================================
+   1. RESET & VARIABLES
+   ========================================================================== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:root {
+  --color-bg: #0f0f10;
+  --color-surface: #1a1a1d;
+  --color-surface-soft: #222226;
+  --color-surface-deep: #18181b;
+  --color-surface-input: #111111;
+
+  --color-text: #f5f5f5;
+  --color-text-muted: #a1a1aa;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-soft: rgba(255, 255, 255, 0.05);
+
+  --color-accent: #dd2a7b;
+  --color-success: #4caf7d;
+
+  --gradient-accent: linear-gradient(135deg, #f58529, #dd2a7b, #8134af, #515bd4);
+  --gradient-card: linear-gradient(145deg, #1a1a1d, #202024);
+
+  --font-body: "DM Sans", sans-serif;
+  --font-heading: "Playfair Display", serif;
+
+  --radius-xs: 0.375rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.5rem;
+  --radius-pill: 62.4375rem;
+  --radius-round: 50%;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.625rem;
+  --space-4: 0.75rem;
+  --space-5: 0.875rem;
+  --space-6: 1rem;
+  --space-7: 1.125rem;
+  --space-8: 1.25rem;
+  --space-9: 1.5rem;
+  --space-10: 1.75rem;
+  --space-11: 2rem;
+
+  --text-xs: 0.625rem;
+  --text-sm: 0.75rem;
+  --text-md: 0.8125rem;
+  --text-base: 0.875rem;
+  --text-lg: 0.9375rem;
+  --text-xl: 1rem;
+  --text-2xl: 1.25rem;
+  --text-3xl: 1.75rem;
+
+  --shadow-elevated: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.5);
+  --shadow-cart: 0 -0.625rem 2.5rem rgba(0, 0, 0, 0.6);
+  --shadow-button: 0 0.25rem 0.9375rem rgba(0, 0, 0, 0.2);
+
+  --transition-fast: 0.2s ease;
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.4s ease;
+
+  --container-padding: 1.25rem;
+  --sticky-top-categories: 0;
+  --sticky-top-waiter: 4.125rem;
+}
+
+/* ==========================================================================
+   2. BASE STYLES
+   ========================================================================== */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ==========================================================================
+   3. HEADER & LAYOUT
+   ========================================================================== */
+.page-header {
+  padding: 1.625rem var(--container-padding);
+  text-align: center;
+  border-bottom: 0.0625rem solid var(--color-border);
+}
+
+.page-header__table-label {
+  margin-bottom: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.0625rem;
+}
+
+.page-header__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+}
+
+.menu-list {
+  width: 100%;
+}
+
+.page-spacer {
+  height: 7.5rem;
+}
+
+/* ==========================================================================
+   4. STATUS HUB (STIKCY BAR)
+   ========================================================================== */
+.status-hub {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1100;
+  margin: 0;
+  background: var(--color-surface-soft);
+  border-bottom: 0.0625rem solid var(--color-accent);
+  box-shadow: var(--shadow-elevated);
+}
+
+.status-hub__main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  gap: 1rem;
+}
+
+.status-hub__info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: var(--text-md);
+}
+
+.status-hub__dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-round);
+  background: var(--color-accent);
+  animation: pulse 1.5s infinite;
+}
+
+.status-hub__dot.is-done {
+  background: var(--color-success) !important;
+  box-shadow: 0 0 0.625rem var(--color-success);
+}
+
+.status-hub__dropdown {
+  display: none;
+  max-height: 25rem;
+  overflow-y: auto;
+  padding: 0 1.25rem 0.9375rem;
+  border-top: 0.0625rem solid var(--color-border);
+}
+
+.status-hub__dropdown.is-open {
+  display: block;
+}
+
+.status-hub__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 0.0625rem solid var(--color-border-soft);
+}
+
+.status-hub__item-title {
+  font-size: var(--text-md);
+  font-weight: 500;
+}
+
+.status-hub__item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status-hub__status {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.status-hub__status.is-done {
+  color: var(--color-success);
+}
+
+.status-hub__footer {
+  margin-top: 0.3125rem;
+  padding: 0.9375rem 0 0.3125rem;
+  text-align: center;
+}
+
+/* ==========================================================================
+   5. CATEGORIES & CARDS
+   ========================================================================== */
+.categories {
+  position: sticky;
+  top: var(--sticky-top-categories);
+  z-index: 90;
+  display: flex;
+  gap: 0.625rem;
+  overflow-x: auto;
+  padding: 0.875rem var(--container-padding);
+  background: var(--color-bg);
+  border-bottom: 0.0625rem solid var(--color-border);
+}
+
+.categories::-webkit-scrollbar {
+  display: none;
+}
+
+.category-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  padding: 0.5rem 1rem;
+  font-size: var(--text-md);
+  transition: var(--transition-fast);
+}
+
+.category-btn.active {
+  border: none;
+  color: #ffffff;
+  background: var(--gradient-accent);
+}
+
+.section {
+  margin-top: 1.75rem;
+  padding: 0 var(--container-padding);
+}
+
+.section-title {
+  margin: 0 0 1rem;
+  font-family: var(--font-heading);
+  font-size: var(--text-2xl);
+}
+
+.item-card {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  margin-bottom: 1rem;
+  padding: 0.875rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--gradient-card);
+}
+
+.item-image {
+  flex-shrink: 0;
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 1.125rem;
+  background-color: #222222;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-name {
+  margin-bottom: 0.25rem;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+.item-desc {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+
+.item-price {
+  margin-top: 0.25rem;
+  color: var(--color-accent);
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   6. CONTROLS & BUTTONS
+   ========================================================================== */
+.qty-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.qty-value {
+  min-width: 1.5rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  transition: var(--transition-fast);
+}
+
+.button--primary {
+  color: #ffffff;
+  background: var(--gradient-accent);
+}
+
+.button--ghost {
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.05);
+  border: 0.0625rem solid var(--color-border);
+}
+
+.button--accent-solid {
+  color: #ffffff;
+  background: var(--color-accent);
+}
+
+.icon-btn {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.75rem;
+  color: #ffffff;
+  font-size: 1.375rem;
+}
+
+.qty-btn {
+  width: 1.875rem;
+  height: 1.875rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-round);
+  background: transparent;
+  color: #ffffff;
+}
+
+.status-hub__toggle-btn,
+.status-hub__link,
+.waiter-btn,
+.cart-btn-main,
+.confirm-btn {
+  border-radius: var(--radius-md);
+}
+
+.status-hub__toggle-btn {
+  padding: 0.375rem 0.875rem;
+  font-size: var(--text-sm);
+}
+
+.status-hub__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.25rem;
+  padding: 0.3125rem 0.625rem;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-accent);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 0.0625rem solid var(--color-border);
+}
+
+.status-hub__view-all-btn {
+  width: auto;
+  min-width: 8.75rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.75rem;
+  background: var(--gradient-accent);
+  color: #ffffff;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   7. CART BAR & PREVIEW
+   ========================================================================== */
+.cart-bar {
+  position: fixed;
+  right: 1rem;
+  bottom: 1.25rem;
+  left: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-cart);
+  transform: translateY(150%);
+  transition: transform var(--transition-slow);
+}
+
+.cart-bar.visible {
+  transform: translateY(0);
+}
+
+.cart-preview {
+  max-height: 10rem;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.preview-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 0.0625rem solid rgba(255, 255, 255, 0.03);
+  font-size: var(--text-base);
+}
+
+.preview-item:last-child {
+  border-bottom: none;
+}
+
+.preview-item__name {
+  flex: 1;
+  font-size: var(--text-base);
+}
+
+.preview-item__qty-box {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-right: 0.625rem;
+  padding: 0.25rem 0.5rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.625rem;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.preview-item__qty-btn {
+  padding: 0 0.3125rem;
+  border: none;
+  background: none;
+  color: var(--color-accent);
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.preview-item__qty-value {
+  min-width: 0.9375rem;
+  text-align: center;
+  font-size: var(--text-md);
+  font-weight: 700;
+}
+
+.preview-item__price {
+  min-width: 3.125rem;
+  text-align: right;
+  color: var(--color-text-muted);
+  font-size: var(--text-md);
+}
+
+.cart-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  margin-top: 0.625rem;
+  padding-top: 0.625rem;
+  border-top: 0.0625rem solid var(--color-border);
+}
+
+.cart-summary__label {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.cart-summary__value {
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.cart-btn-main {
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   8. MODAL, OVERLAY & UPSELL (PERDITESUAR)
+   ========================================================================== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: none;
+  align-items: flex-end;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(0.5rem);
+}
+
+.overlay.is-visible {
+  display: flex;
+}
+
+.modal {
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+  border-radius: 1.5rem 1.5rem 0 0;
+  background: var(--color-surface-deep);
+}
+
+.modal__title {
+  margin: 0 0 1.25rem;
+  text-align: center;
+  font-family: var(--font-heading);
+}
+
+.modal__items {
+  max-height: 18.75rem;
+  overflow-y: auto;
+}
+
+.modal__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0 1.25rem; /* Pak me shume padding per hapesire */
+  border-bottom: 0.0625rem solid var(--color-border);
+}
+
+.modal__item-info {
+  flex: 1;
+}
+
+.modal__item-name {
+  font-size: var(--text-lg); /* Zmadhuar per lehtesi leximi */
+  font-weight: 700;
+}
+
+.modal__item-price {
+  color: var(--color-text-muted);
+  font-size: var(--text-base); /* Zmadhuar pak nga text-sm */
+}
+
+.note-field {
+  width: 100%;
+  min-height: 6.25rem;
+  margin-top: 0.9375rem;
+  padding: 0.9375rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.9375rem;
+  background: var(--color-surface-input);
+  color: #ffffff;
+  resize: vertical;
+}
+
+/* NDRYSHIMI: Tekst shumë i madh për dërgimin */
+.confirm-btn {
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 1.125rem;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-xl);
+  font-weight: 800;
+  letter-spacing: 0.02rem;
+  background: var(--gradient-accent);
+  color: #ffffff;
+}
+
+.waiter-btn {
+  position: fixed;
+  top: var(--sticky-top-waiter);
+  right: 1rem;
+  z-index: 1001;
+  padding: 0.5rem 1rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  backdrop-filter: blur(0.9375rem);
+  box-shadow: var(--shadow-button);
+  transition: var(--transition-base);
+}
+
+/* ==========================================================================
+   9. UPSELL SECTION (ZMADHUAR)
+   ========================================================================== */
+.upsell {
+  margin-top: 1.25rem;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: fadeIn 0.4s ease forwards;
+}
+
+.upsell__text {
+  font-size: var(--text-base); /* Zmadhuar per vone re */
+  color: var(--color-text-muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05rem;
+}
+
+.upsell__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+/* NDRYSHIMI: Madhësia e tekstit për butonin e propozimit */
+.upsell-btn {
+  flex: 2;
+  background: var(--color-surface-soft);
+  color: var(--color-text);
+  border: 0.0625rem solid var(--color-border);
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  transition: var(--transition-fast);
+}
+
+.upsell-btn span {
+  color: var(--color-accent);
+  font-weight: 800;
+}
+
+.upsell-view-all-btn {
+  flex: 1;
+  background: var(--color-surface-soft);
+  color: var(--color-text-muted);
+  border: 0.0625rem solid var(--color-border);
+  padding: 0.875rem 0.5rem;
+  border-radius: var(--radius-md);
+  font-size: var(--text-base); /* Zmadhuar per uniformitet */
+  font-weight: 600;
+  text-align: center;
+  transition: var(--transition-fast);
+}
+
+.upsell-btn:active,
+.upsell-view-all-btn:active {
+  transform: scale(0.96);
+}
+
+/* ==========================================================================
+   10. ANIMATIONS & MEDIA QUERIES
+   ========================================================================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+@media (max-width: 30rem) {
+  .item-card {
+    align-items: flex-start;
+  }
+  .cart-footer {
+    align-items: flex-end;
+  }
+  .upsell__actions {
+    flex-direction: column; /* Ne mobile shume te vogel, butonat dalin njeri mbi tjetrin */
+  }
+  .upsell-btn, .upsell-view-all-btn {
+    width: 100%;
+  }
+}

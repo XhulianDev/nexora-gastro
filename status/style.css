@@ -1,113 +1,319 @@
-:root {
-    --bg: #0F0E0C; --surface: #1A1917; --border: #2E2C29;
-    --text: #F0EDE8; --muted: #7A7570; --accent: #C8622A;
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
-body { 
-    background: var(--bg); color: var(--text); 
-    font-family: 'DM Sans', sans-serif; margin: 0; padding: 20px;
-    display: flex; flex-direction: column; align-items: center; min-height: 100vh;
-}
-.header-logo { font-family: 'Playfair Display', serif; font-size: 24px; color: var(--accent); margin-bottom: 30px; text-align: center; }
 
-/* Containeri kryesor me Grid për Laptop */
-.container { 
-    width: 100%; max-width: 1200px; 
-    display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); 
-    gap: 20px; justify-content: center;
+:root {
+  --color-bg: #0f0e0c;
+  --color-surface: #1a1917;
+  --color-border: #2e2c29;
+  --color-text: #f0ede8;
+  --color-text-muted: #7a7570;
+  --color-accent: #c8622a;
+  --color-yellow: #e8b84b;
+  --color-green: #4caf7d;
+
+  --font-body: "DM Sans", sans-serif;
+  --font-heading: "Playfair Display", serif;
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.625rem;
+  --space-4: 0.75rem;
+  --space-5: 0.875rem;
+  --space-6: 1rem;
+  --space-7: 1.25rem;
+  --space-8: 1.5rem;
+  --space-9: 1.875rem;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.875rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 0.625rem 1.875rem rgba(0, 0, 0, 0.3);
+
+  --transition-base: 0.3s ease;
+  --transition-slow: 0.8s ease;
 }
-/* Kur është vetëm 1 porosi, e mbajmë të ngushtë në mes */
-.container.single-mode { max-width: 400px; grid-template-columns: 1fr; }
+
+html {
+  font-size: 16px;
+}
+
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  padding: 1.25rem;
+}
+
+button {
+  font: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.page-header {
+  width: 100%;
+}
+
+.header-logo {
+  margin-bottom: 1.875rem;
+  text-align: center;
+  color: var(--color-accent);
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+}
+
+.container {
+  display: grid;
+  width: 100%;
+  max-width: 75rem;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 1.25rem;
+  justify-content: center;
+}
+
+.container.single-mode {
+  max-width: 25rem;
+  grid-template-columns: 1fr;
+}
 
 .order-card {
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 24px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    height: fit-content;
+  height: fit-content;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  padding: 1.5625rem;
+  box-shadow: var(--shadow-card);
 }
 
-/* Statusi Vizual (Progress Bar) */
-.status-visual { 
-    height: 4px; 
-    background: var(--border); 
-    border-radius: 10px; 
-    margin: 30px 0 10px 0; /* Rritur pak hapësira */
-    position: relative; 
+.order-header {
+  margin-bottom: 1.25rem;
+  text-align: center;
 }
 
-.progress-bar { 
-    position: absolute; 
-    left: 0; 
-    top: 0; 
-    height: 100%; 
-    background: var(--accent); 
-    transition: width 0.8s ease; 
-    border-radius: 10px;
+.order-index {
+  color: var(--color-accent);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
-/* SIMETRIA E RE */
-.status-labels { 
-    display: flex; 
-    font-size: 10px; 
-    text-transform: uppercase; 
-    width: 100%;
-    position: relative;
-    top: 10px;
+.order-table {
+  margin-top: 0.25rem;
+  color: var(--color-text-muted);
+  font-size: 0.6875rem;
 }
 
-.status-labels .label { 
-    flex: 1; /* Çdo etiketë merr saktësisht 1/3 e hapësirës */
+.status-visual {
+  position: relative;
+  margin: 1.875rem 0 0.625rem;
+  border-radius: 0.625rem;
+  background: var(--color-border);
+  height: 0.25rem;
 }
 
-.status-labels .label:nth-child(1) { text-align: left; }   /* Majtas */
-.status-labels .label:nth-child(2) { text-align: center; } /* FIX NE MES - Nën Tavolinën */
-.status-labels .label:nth-child(3) { text-align: right; }  /* Djathtas */
+.progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 0.625rem;
+  background: var(--color-accent);
+  transition: width var(--transition-slow);
+}
 
-.label.active { color: var(--accent); font-weight: 700; }
+.progress-bar--new {
+  width: 33.3%;
+}
 
-/* Badges për listën e porosive */
-.badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
-.status-new { background: rgba(200,98,42,0.1); color: var(--accent); }
-.status-preparing { background: rgba(232,184,75,0.1); color: #E8B84B; }
-.status-done { background: rgba(76,175,125,0.1); color: #4CAF7D; }
+.progress-bar--preparing {
+  width: 66.6%;
+}
 
-.items-list { border-top: 1px solid var(--border); margin-top: 15px; padding-top: 15px; }
-.item-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; }
-.total-row { border-top: 1px solid var(--border); margin-top: 10px; padding-top: 10px; display: flex; justify-content: space-between; font-weight: 600; }
+.progress-bar--done {
+  width: 100%;
+}
+
+.status-labels {
+  position: relative;
+  top: 0.625rem;
+  display: flex;
+  width: 100%;
+  font-size: 0.625rem;
+  text-transform: uppercase;
+}
+
+.status-label {
+  flex: 1;
+}
+
+.status-label:nth-child(1) {
+  text-align: left;
+}
+
+.status-label:nth-child(2) {
+  text-align: center;
+}
+
+.status-label:nth-child(3) {
+  text-align: right;
+}
+
+.status-label.active {
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.status-message-box {
+  margin-top: 1.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.9375rem;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 0.9375rem;
+  text-align: center;
+  font-size: 0.8125rem;
+}
+
+.items-list {
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.9375rem;
+}
+
+.item-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.375rem;
+  gap: 1rem;
+  font-size: 0.875rem;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.625rem;
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.625rem;
+  font-weight: 600;
+}
+
+.rating-box {
+  margin-top: 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.9375rem;
+  text-align: center;
+}
+
+.rating-question {
+  margin-bottom: 0.625rem;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+}
+
+.rating-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1.25rem;
+  font-size: 1.625rem;
+}
+
+.rating-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+.rating-thanks {
+  margin-top: 0.9375rem;
+  text-align: center;
+  color: var(--color-green);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
 
 .back-btn {
-    background: transparent; border: 1px solid var(--border); color: var(--text);
-    padding: 14px; border-radius: 14px; cursor: pointer; width: 100%; max-width: 400px; margin-top: 30px;
+  width: 100%;
+  max-width: 25rem;
+  margin-top: 1.875rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 0.875rem;
 }
 
-/* Seksioni Kompakt i Totalit */
+.waiter-btn {
+  position: fixed;
+  top: 1.25rem;
+  right: 1rem;
+  z-index: 1000;
+  border: 1px solid var(--color-border);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  backdrop-filter: blur(0.625rem);
+  box-shadow: 0 0.25rem 0.9375rem rgba(0, 0, 0, 0.3);
+  transition: var(--transition-base);
+}
+
 .grand-total-bar {
-    grid-column: 1 / -1;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--surface);
-    border: 1px dashed var(--border); /* Stil si faturë */
-    padding: 15px 25px;
-    border-radius: 16px;
-    margin-top: 10px;
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.625rem;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  padding: 0.9375rem 1.5625rem;
 }
 
 .total-text {
-    font-size: 13px;
-    text-transform: uppercase;
-    color: var(--accent);
-    letter-spacing: 1px;
-    font-weight: 700;
+  color: var(--color-accent);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.0625rem;
+  text-transform: uppercase;
 }
 
 .total-price {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--accent);
-    font-family: 'DM Sans', sans-serif;
+  color: var(--color-accent);
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
-.total-price span {
-    color: var(--accent);
-    margin-left: 4px;
+.empty-state {
+  width: 100%;
+  max-width: 25rem;
+  margin: 0 auto;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.9375rem;
+  padding: 2rem 1rem;
+}
+
+@media (max-width: 40rem) {
+  .grand-total-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
 }
