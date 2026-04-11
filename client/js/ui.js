@@ -240,3 +240,21 @@ export function renderStatusHub(orders, keepOpen = false) {
 export function toggleHubDropdown() {
   document.querySelector('#hub-drop')?.classList.toggle('is-open');
 }
+
+/**
+ * Shfaq një njoftim të përkohshëm (toast) në ekran.
+ * @param {string} message - Mesazhi për t'u shfaqur.
+ * @param {string} type - Tipi i njoftimit ('success' ose 'error').
+ */
+export function showToast(message, type = 'error') {
+  const toast = document.createElement('div');
+  toast.className = `toast-notification ${type === 'error' ? 'is-error' : ''}`;
+  toast.textContent = message;
+  
+  document.body.appendChild(toast);
+
+  // Fshije elementin pas animacionit
+  setTimeout(() => {
+    toast.remove();
+  }, 3300); // Koha duhet të jetë pak më e gjatë se animacioni (3s + 0.3s)
+}

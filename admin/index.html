@@ -29,10 +29,9 @@
 
       <nav class="nav" aria-label="Navigimi kryesor">
         <button
-          class="nav-item"
+          class="nav-item active"
           id="nav-orders"
           type="button"
-          data-action="navigate"
           data-page="orders"
         >
           <span class="nav-dot"></span>
@@ -44,11 +43,19 @@
           class="nav-item"
           id="nav-menu"
           type="button"
-          data-action="navigate"
           data-page="menu"
         >
           <span class="nav-dot"></span>
           Menyja
+        </button>
+
+        <button
+          class="nav-item"
+          id="view-live-site-btn"
+          type="button"
+        >
+          <span class="nav-dot"></span>
+          Shiko Faqen e Menysë
         </button>
       </nav>
 
@@ -164,8 +171,8 @@
       <div class="form-title" id="form-title">Shto artikull</div>
 
       <div class="form-group">
-        <label class="form-label" for="f-image">URL e Fotos</label>
-        <input class="form-input" id="f-image" type="url" placeholder="https://example.com/photo.jpg" />
+        <label class="form-label" for="f-image">Foto</label>
+        <input class="form-input" id="f-image" type="file" accept="image/*" />
       </div>
 
       <div class="form-group">

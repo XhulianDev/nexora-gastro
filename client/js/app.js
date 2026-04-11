@@ -1,4 +1,4 @@
-import { API } from './constants.js';
+import { API, ACTIONS, SELECTORS } from './constants.js';
 import { getActiveOrderIdsFromStorage, setActiveOrderIdsToStorage } from './utils.js';
 import { state, findMenuItemById } from './state.js';
 import { fetchActiveMenu, submitOrder, fetchActiveOrders, insertWaiterCall } from './api.js';
@@ -26,7 +26,7 @@ function bindStaticEvents() {
   // Përdorim Event Delegation për performancë maksimale
   document.addEventListener('click', handleGlobalClicks);
   
-  const overlay = document.querySelector('#overlay');
+  const overlay = document.querySelector(SELECTORS.overlay);
   overlay?.addEventListener('click', (e) => {
     if (e.target === overlay) ui.closeModal();
   });
@@ -45,7 +45,7 @@ function handleGlobalClicks(event) {
   }
 
   // 2. Navigimi direkt te kategoria (nga Upsell ose butona të tjerë specialë)
-  const viewCatBtn = target.closest('[data-action="view-category"]');
+  const viewCatBtn = target.closest(`[data-action="${ACTIONS.VIEW_CATEGORY}"]`);
   if (viewCatBtn) {
     const category = viewCatBtn.dataset.category;
     ui.navigateToCategory(category);
@@ -53,7 +53,7 @@ function handleGlobalClicks(event) {
   }
 
   // 3. Ndryshimi i sasisë (+/-)
-  const qtyBtn = target.closest('[data-action="change-qty"]');
+  const qtyBtn = target.closest(`[data-action="${ACTIONS.CHANGE_QTY}"]`);
   if (qtyBtn) {
     const itemId = qtyBtn.dataset.itemId;
     const delta = parseInt(qtyBtn.dataset.delta, 10);
@@ -62,32 +62,35 @@ function handleGlobalClicks(event) {
   }
 
   // 4. Shtimi nga Upsell
-  const upsellBtn = target.closest('[data-action="upsell-add"]');
+  const upsellBtn = target.closest(`[data-action="${ACTIONS.UPSELL_ADD}"]`);
   if (upsellBtn) {
     changeQty(upsellBtn.dataset.itemId, 1);
     return;
   }
 
   // 5. Hapja e modalit (Checkout)
-  if (target.closest('#cart-open-btn')) {
+  if (target.closest(SELECTORS.cartOpenButton)) {
     ui.openModal();
     return;
   }
 
   // 6. Dërgimi i porosisë
-  if (target.closest('[data-action="send-order"]')) {
+  const sendOrderBtn = target.closest(`[data-action="${ACTIONS.SEND_ORDER}"]`);
+  if (sendOrderBtn) {
     sendOrder();
     return;
   }
 
   // 7. Hub-i i statuseve
-  if (target.closest('[data-action="toggle-hub"]')) {
+  const toggleHubBtn = target.closest(`[data-action="${ACTIONS.TOGGLE_HUB}"]`);
+  if (toggleHubBtn) {
     event.stopPropagation();
     ui.toggleHubDropdown();
     return;
   }
 
-  if (target.closest('[data-action="view-all-status"]')) {
+  const viewAllStatusBtn = target.closest(`[data-action="${ACTIONS.VIEW_ALL_STATUS}"]`);
+  if (viewAllStatusBtn) {
     window.location.href = 'status/?all=true';
     return;
   }
@@ -107,6 +110,7 @@ async function initMenu() {
     ui.updateCartBar();
   } catch (error) {
     console.error('Gabim në menunë:', error);
+    ui.showToast('Gabim në ngarkimin e menysë. Provoni sërish.');
   }
 }
 
@@ -123,7 +127,7 @@ function changeQty(itemId, delta) {
   ui.updateCartBar();
   ui.renderMenu();
 
-  const isModalOpen = document.querySelector('#overlay')?.classList.contains('is-visible');
+  const isModalOpen = document.querySelector(SELECTORS.overlay)?.classList.contains('is-visible');
   if (isModalOpen) {
     if (Object.keys(state.cart).length === 0) {
       ui.closeModal();
@@ -160,7 +164,7 @@ async function sendOrder() {
     window.location.href = `status/?id=${data.id}`;
   } catch (error) {
     console.error('Dështoi dërgimi:', error);
-    alert('Gabim gjatë dërgimit të porosisë.');
+    ui.showToast('Gabim gjatë dërgimit të porosisë.');
     sendBtn.disabled = false;
     sendBtn.textContent = 'DËRGO POROSINË';
   }
@@ -183,7 +187,7 @@ async function syncStatus() {
 }
 
 async function callWaiter() {
-  const btn = document.querySelector('#waiter-btn');
+  const btn = document.querySelector(SELECTORS.waiterButton);
   if (!btn || btn.disabled) return;
 
   btn.innerHTML = '⏳ Po vjen...';
@@ -197,15 +201,16 @@ async function callWaiter() {
     }, API.WAITER_COOLDOWN);
   } catch (error) {
     console.error('Gabim kamarieri:', error);
+    ui.showToast('Problem me thirrjen e kamarierit.');
     btn.innerHTML = '🔔 Kamarieri';
     btn.disabled = false;
   }
 }
 
 function injectWaiterButton() {
-  if (document.querySelector('#waiter-btn')) return;
+  if (document.querySelector(SELECTORS.waiterButton)) return;
   const btn = document.createElement('button');
-  btn.id = 'waiter-btn';
+  btn.id = SELECTORS.waiterButton.substring(1);
   btn.className = 'waiter-btn';
   btn.innerHTML = '🔔 Kamarieri';
   btn.onclick = callWaiter;

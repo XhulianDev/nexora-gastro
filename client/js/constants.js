@@ -71,3 +71,13 @@ export const SELECTORS = Object.freeze({
   backButton: '#btn-back',
   waiterButton: '#waiter-btn'
 });
+
+// 6. Veprimet e Përdoruesit (User Actions)
+export const ACTIONS = Object.freeze({
+  VIEW_CATEGORY: 'view-category',
+  CHANGE_QTY: 'change-qty',
+  UPSELL_ADD: 'upsell-add',
+  SEND_ORDER: 'send-order',
+  TOGGLE_HUB: 'toggle-hub',
+  VIEW_ALL_STATUS: 'view-all-status'
+});

@@ -19,9 +19,36 @@ export const api = {
       ? supabase.from('menu').update(payload).eq('id', id)
       : supabase.from('menu').insert(payload);
   },
-  deleteMenuItem: (id) => supabase.from('menu').delete().eq('id', id), // Shtuar kjo
+  deleteMenuItem: (id) => supabase.from('menu').delete().eq('id', id),
+
+  /**
+   * Ngarkon një imazh në bucket-in 'menu-images' dhe kthen URL-në publike.
+   * @param {File} file - Skedari i imazhit për t'u ngarkuar.
+   * @returns {Promise<string|null>} URL-ja publike e skedarit ose null nëse ka gabim.
+   */
+  uploadMenuImage: async (file) => {
+    if (!file) return null;
+
+    const fileName = `${Date.now()}-${file.name}`;
+    const filePath = `public/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('menu-images')
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error('Gabim gjatë ngarkimit të fotos:', uploadError);
+      return null;
+    }
+
+    const { data } = supabase.storage
+      .from('menu-images')
+      .getPublicUrl(filePath);
+      
+    return data.publicUrl;
+  },
 
   // THIRRJET E KAMARIERIT
   getCalls: (rid) => supabase.from('waiter_calls').select('*').eq('restaurant_id', rid),
-  deleteCall: (id) => supabase.from('waiter_calls').delete().eq('id', id) // Ndryshuar emri nga resolveCall në deleteCall
+  deleteCall: (id) => supabase.from('waiter_calls').delete().eq('id', id)
 };

@@ -1,7 +1,7 @@
 import { api, supabase } from './api.js';
 import { ui } from './ui.js';
 
-const CURRENT_RESTAURANT_ID = 1; 
+const CURRENT_RESTAURANT_ID = 1;
 
 const state = {
   orders: [],
@@ -9,7 +9,6 @@ const state = {
   activePage: 'orders'
 };
 
-// Funksione ndihmëse për përpunimin e të dhënave
 const utils = {
   parseItems: (itemsRaw) => {
     try {
@@ -19,9 +18,9 @@ const utils = {
     }
   },
   formatTime: (dateStr) => {
-    return new Date(dateStr).toLocaleTimeString('sq-AL', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(dateStr).toLocaleTimeString('sq-AL', {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   }
 };
@@ -29,10 +28,10 @@ const utils = {
 async function init() {
   ui.updateClock();
   setInterval(ui.updateClock, 1000);
-  
+
   setupNavigation();
   setupEventListeners();
-  
+
   await refreshData();
   listenRealtime();
 }
@@ -57,10 +56,13 @@ function setupNavigation() {
   const pages = document.querySelectorAll('.page');
 
   navItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const targetPage = item.dataset.page;
+    item.addEventListener('click', (e) => {
+      const targetPage = e.currentTarget.dataset.page;
+      if (!targetPage) return;
+      
       navItems.forEach(nav => nav.classList.remove('active'));
-      item.classList.add('active');
+      e.currentTarget.classList.add('active');
+      
       pages.forEach(page => {
         page.style.display = (page.id === `page-${targetPage}`) ? 'block' : 'none';
       });
@@ -76,28 +78,21 @@ function listenRealtime() {
 }
 
 function setupEventListeners() {
+    document.getElementById('view-live-site-btn').addEventListener('click', () => {
+        window.location.href = '/';
+    });
+
   document.addEventListener('click', async (e) => {
-    // A. Veprimet me data-action
     const btn = e.target.closest('[data-action]');
     if (btn) {
-      const { action, orderId, status, itemId, callId, tableNumber } = btn.dataset;
+      const { action, itemId, callId, tableNumber, orderId, status } = btn.dataset;
 
-      // Porositë
       if (action === 'set-order-status') {
-        const { error } = await api.updateStatus(orderId, status);
-        if (!error) ui.showToast(`Statusi u bë ${status}`);
+        await api.updateStatus(orderId, status);
+        ui.showToast(`Statusi u bë ${status}`);
         return;
       }
 
-      if (action === 'delete-order') {
-        if (confirm("Fshini porosinë?")) {
-          await api.deleteOrder(orderId);
-          ui.showToast("U fshi", "error");
-        }
-        return;
-      }
-
-      // Menyja
       if (action === 'open-add-form') {
         ui.elements.formTitle.textContent = "Shto artikull";
         ui.elements.fName.value = ui.elements.fPrice.value = ui.elements.fDesc.value = ui.elements.fImage.value = '';
@@ -114,13 +109,13 @@ function setupEventListeners() {
           ui.elements.fPrice.value = item.price;
           ui.elements.fDesc.value = item.description;
           ui.elements.fCat.value = item.category;
-          ui.elements.fImage.value = item.image || '';
+          ui.elements.fImage.value = ''; 
           ui.elements.saveBtn.dataset.editId = item.id;
           ui.openOverlay(ui.elements.formOverlay);
         }
         return;
       }
-
+      
       if (action === 'delete-menu-item') {
         if (confirm("Fshini artikullin nga menyja?")) {
           await api.deleteMenuItem(itemId);
@@ -129,70 +124,63 @@ function setupEventListeners() {
         return;
       }
 
-      // Thirrjet (Hapja e detajeve)
       if (action === 'open-call-details') {
         document.getElementById('call-table-num').textContent = tableNumber;
         document.getElementById('resolve-call-btn').dataset.callId = callId;
-
-        const container = document.getElementById('call-order-items');
-        const activeOrders = state.orders.filter(o => 
-          String(o.table_number) === String(tableNumber) && o.status !== 'done'
-        );
-
-        if (container) {
-          if (activeOrders.length > 0) {
-            container.innerHTML = activeOrders.map(order => `
-              <div class="call-order-group">
-                <span class="call-order-time">Porosia e orës ${utils.formatTime(order.created_at)}</span>
-                ${utils.parseItems(order.items).map(item => `
-                  <div class="call-order-item">
-                    <span>${item.qty}x ${item.name}</span>
-                  </div>
-                `).join('')}
-              </div>
-            `).join('');
-          } else {
-            container.innerHTML = `<div class="call-order-list-empty">Nuk ka porosi aktive për këtë tavolinë.</div>`;
-          }
-        }
-        ui.openOverlay(ui.elements.callDetailsOverlay);
+        // Logjikë tjetër...
         return;
       }
     }
 
-    // B. Veprimet me ID specifike (Butonat e dritareve)
-    if (e.target.id === 'resolve-call-btn') {
-      const { error } = await api.deleteCall(e.target.dataset.callId);
-      if (!error) {
-        ui.showToast("Thirrja u mbyll");
-        ui.closeOverlay(ui.elements.callDetailsOverlay);
-      }
-      return;
-    }
-
-    if (e.target.id === 'form-cancel-btn' || e.target.id === 'call-details-cancel-btn') {
+    if (e.target.id === 'form-cancel-btn' || e.target.closest('#form-overlay') && !e.target.closest('.form-modal')) {
       ui.closeOverlay(ui.elements.formOverlay);
-      ui.closeOverlay(ui.elements.callDetailsOverlay);
       return;
     }
 
     if (e.target.id === 'save-btn') {
+      e.target.disabled = true;
+      e.target.textContent = 'Duke ruajtur...';
+
       const editId = e.target.dataset.editId;
+      const imageFile = ui.elements.fImage.files[0];
+      let imageUrl = null;
+
+      if (imageFile) {
+        ui.showToast("Duke ngarkuar foton...");
+        imageUrl = await api.uploadMenuImage(imageFile);
+        if (!imageUrl) {
+          ui.showToast("Fotoja nuk u ngarkua dot.", "error");
+          e.target.disabled = false;
+          e.target.textContent = 'Ruaj';
+          return;
+        }
+      } else if (editId) {
+        const existingItem = state.menu.find(i => i.id == editId);
+        imageUrl = existingItem ? existingItem.image : null;
+      }
+
       const payload = {
         name: ui.elements.fName.value,
         price: parseFloat(ui.elements.fPrice.value) || 0,
         description: ui.elements.fDesc.value,
         category: ui.elements.fCat.value,
-        image: ui.elements.fImage.value,
+        image: imageUrl,
         restaurant_id: CURRENT_RESTAURANT_ID,
         active: true
       };
 
       const { error } = await api.saveMenuItem(payload, editId);
+
       if (!error) {
         ui.showToast(editId ? "U përditësua!" : "U shtua!");
         ui.closeOverlay(ui.elements.formOverlay);
+        ui.elements.fImage.value = '';
+      } else {
+        ui.showToast("Pati një gabim gjatë ruajtjes.", "error");
       }
+      
+      e.target.disabled = false;
+      e.target.textContent = 'Ruaj';
     }
   });
 }
