@@ -1,5 +1,6 @@
 import { api, supabase } from './api.js';
 import { ui } from './ui.js';
+import { utils } from './utils.js';
 
 const CURRENT_RESTAURANT_ID = 1;
 
@@ -7,22 +8,6 @@ const state = {
   orders: [],
   menu: [],
   activePage: 'orders'
-};
-
-const utils = {
-  parseItems: (itemsRaw) => {
-    try {
-      return typeof itemsRaw === 'string' ? JSON.parse(itemsRaw) : itemsRaw;
-    } catch (e) {
-      return [];
-    }
-  },
-  formatTime: (dateStr) => {
-    return new Date(dateStr).toLocaleTimeString('sq-AL', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
 };
 
 async function init() {
@@ -146,8 +131,19 @@ function setupEventListeners() {
       let imageUrl = null;
 
       if (imageFile) {
-        ui.showToast("Duke ngarkuar foton...");
-        imageUrl = await api.uploadMenuImage(imageFile);
+        try {
+          ui.showToast("Duke optimizuar foton...");
+          const optimizedImage = await utils.optimizeImage(imageFile);
+          ui.showToast("Duke ngarkuar foton...");
+          imageUrl = await api.uploadMenuImage(optimizedImage);
+        } catch (error) {
+          console.error("Image optimization failed:", error);
+          ui.showToast("Optimizimi i fotos dështoi.", "error");
+          e.target.disabled = false;
+          e.target.textContent = 'Ruaj';
+          return;
+        }
+
         if (!imageUrl) {
           ui.showToast("Fotoja nuk u ngarkua dot.", "error");
           e.target.disabled = false;
