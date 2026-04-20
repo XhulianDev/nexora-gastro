@@ -22,31 +22,37 @@ export const api = {
   deleteMenuItem: (id) => supabase.from('menu').delete().eq('id', id),
 
   /**
-   * Ngarkon një imazh në bucket-in 'menu-images' dhe kthen URL-në publike.
-   * @param {File} file - Skedari i imazhit për t'u ngarkuar.
+   * Thërret një Edge Function për të ngarkuar imazhin në mënyrë të sigurt.
+   * @param {File} imageFile - Skedari i imazhit për t'u ngarkuar.
    * @returns {Promise<string|null>} URL-ja publike e skedarit ose null nëse ka gabim.
    */
-  uploadMenuImage: async (file) => {
-    if (!file) return null;
+  uploadMenuImage: async (imageFile) => {
+      try {
+        // Thërret funksionin e ri 'upload-menu-image' në Supabase
+        const { data, error } = await supabase.functions.invoke('upload-menu-image', {
+          body: imageFile, // Dërgon skedarin e fotos
+          headers: {
+            'x-file-name': imageFile.name, // Dërgon emrin e skedarit
+          },
+        });
 
-    const fileName = `${Date.now()}-${file.name}`;
-    const filePath = `public/${fileName}`;
+        if (error) {
+          console.error('Gabim gjatë thirrjes së funksionit:', error.message);
+          return null;
+        }
 
-    const { error: uploadError } = await supabase.storage
-      .from('menu-images')
-      .upload(filePath, file);
+        // Tani që fotoja u ngarkua nga funksioni, marrim URL-në e saj publike
+        const { data: publicUrlData } = supabase.storage
+          .from('menu-images')
+          .getPublicUrl(data.path); // 'data.path' vjen nga përgjigja e funksionit
+        
+        return publicUrlData.publicUrl;
 
-    if (uploadError) {
-      console.error('Gabim gjatë ngarkimit të fotos:', uploadError);
-      return null;
-    }
-
-    const { data } = supabase.storage
-      .from('menu-images')
-      .getPublicUrl(filePath);
-      
-    return data.publicUrl;
-  },
+      } catch (e) {
+        console.error('Gabim fatal gjatë ngarkimit të fotos:', e);
+        return null;
+      }
+    },
 
   // THIRRJET E KAMARIERIT
   getCalls: (rid) => supabase.from('waiter_calls').select('*').eq('restaurant_id', rid),
