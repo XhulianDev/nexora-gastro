@@ -1,3 +1,4 @@
+
 import { api, supabase } from './api.js';
 import { ui } from './ui.js';
 import { utils } from './utils.js';
@@ -96,6 +97,7 @@ function setupEventListeners() {
           ui.elements.fCat.value = item.category;
           ui.elements.fImage.value = ''; 
           ui.elements.saveBtn.dataset.editId = item.id;
+          ui.elements.saveBtn.dataset.oldImageUrl = item.image; // Ruaj URL-në e vjetër
           ui.openOverlay(ui.elements.formOverlay);
         }
         return;
@@ -103,6 +105,10 @@ function setupEventListeners() {
       
       if (action === 'delete-menu-item') {
         if (confirm("Fshini artikullin nga menyja?")) {
+          const itemToDelete = state.menu.find(i => i.id == itemId);
+          if (itemToDelete && itemToDelete.image) {
+            await api.deleteMenuImage(itemToDelete.image); // Fshij imazhin e vjetër
+          }
           await api.deleteMenuItem(itemId);
           ui.showToast("U fshi", "error");
         }
@@ -123,60 +129,70 @@ function setupEventListeners() {
     }
 
     if (e.target.id === 'save-btn') {
-      e.target.disabled = true;
-      e.target.textContent = 'Duke ruajtur...';
+      const saveButton = e.target;
+      saveButton.disabled = true;
+      saveButton.textContent = 'Duke ruajtur...';
 
-      const editId = e.target.dataset.editId;
+      const editId = saveButton.dataset.editId;
+      const oldImageUrl = saveButton.dataset.oldImageUrl;
       const imageFile = ui.elements.fImage.files[0];
-      let imageUrl = null;
+      let newImageUrl = null;
 
-      if (imageFile) {
-        try {
+      try {
+        if (imageFile) {
           ui.showToast("Duke optimizuar foton...");
           const optimizedImage = await utils.optimizeImage(imageFile);
           ui.showToast("Duke ngarkuar foton...");
-          imageUrl = await api.uploadMenuImage(optimizedImage);
-        } catch (error) {
-          console.error("Image optimization failed:", error);
-          ui.showToast("Optimizimi i fotos dështoi.", "error");
-          e.target.disabled = false;
-          e.target.textContent = 'Ruaj';
-          return;
+          newImageUrl = await api.uploadMenuImage(optimizedImage);
+
+          // Nese ngarkimi i ri pati sukses DHE ishim duke edituar,
+          // fshij imazhin e vjeter.
+          if (newImageUrl && editId && oldImageUrl) {
+              await api.deleteMenuImage(oldImageUrl);
+          }
         }
 
-        if (!imageUrl) {
-          ui.showToast("Fotoja nuk u ngarkua dot.", "error");
-          e.target.disabled = false;
-          e.target.textContent = 'Ruaj';
-          return;
+        const payload = {
+          name: ui.elements.fName.value,
+          price: parseFloat(ui.elements.fPrice.value) || 0,
+          description: ui.elements.fDesc.value,
+          category: ui.elements.fCat.value,
+          restaurant_id: CURRENT_RESTAURANT_ID,
+          active: true
+        };
+
+        // Shto imazhin ne payload vetem nese eshte i ri ose nese nuk ka nje te ri por jemi duke edituar.
+        if (newImageUrl) {
+            payload.image = newImageUrl;
+        } else if (editId) {
+            payload.image = oldImageUrl;
         }
-      } else if (editId) {
-        const existingItem = state.menu.find(i => i.id == editId);
-        imageUrl = existingItem ? existingItem.image : null;
+
+        const { error } = await api.saveMenuItem(payload, editId);
+
+        if (!error) {
+          ui.showToast(editId ? "U përditësua!" : "U shtua!");
+          ui.closeOverlay(ui.elements.formOverlay);
+          ui.elements.fImage.value = '';
+        } else {
+          throw new Error(error.message);
+        }
+
+      } catch (error) {
+          console.error('Save process failed:', error);
+          ui.showToast(`Pati një gabim: ${error.message}`, "error");
+          // Nese ngarkimi i ri deshtoi, mos e fshij imazhin e vjeter!
+          // Nese imazhi i ri u ngarkua por ruajtja ne db deshtoi, fshije ate qe sapo u ngarkua.
+          if (newImageUrl) {
+              console.warn('Rolling back image upload due to database error...');
+              await api.deleteMenuImage(newImageUrl);
+          }
+      } finally {
+          saveButton.disabled = false;
+          saveButton.textContent = 'Ruaj';
+          delete saveButton.dataset.editId;
+          delete saveButton.dataset.oldImageUrl;
       }
-
-      const payload = {
-        name: ui.elements.fName.value,
-        price: parseFloat(ui.elements.fPrice.value) || 0,
-        description: ui.elements.fDesc.value,
-        category: ui.elements.fCat.value,
-        image: imageUrl,
-        restaurant_id: CURRENT_RESTAURANT_ID,
-        active: true
-      };
-
-      const { error } = await api.saveMenuItem(payload, editId);
-
-      if (!error) {
-        ui.showToast(editId ? "U përditësua!" : "U shtua!");
-        ui.closeOverlay(ui.elements.formOverlay);
-        ui.elements.fImage.value = '';
-      } else {
-        ui.showToast("Pati një gabim gjatë ruajtjes.", "error");
-      }
-      
-      e.target.disabled = false;
-      e.target.textContent = 'Ruaj';
     }
   });
 }
