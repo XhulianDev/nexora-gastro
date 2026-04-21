@@ -170,9 +170,21 @@
     <div class="form-modal" role="dialog" aria-modal="true" aria-labelledby="form-title">
       <div class="form-title" id="form-title">Shto artikull</div>
 
+      <div id="current-image-container" class="form-group" style="display: none;">
+          <label class="form-label">Fotoja aktuale</label>
+          <div class="current-image-wrapper">
+              <img id="current-image-preview" src="" alt="Fotoja aktuale" class="current-image" />
+              <button id="remove-image-btn" type="button" class="btn-remove-image" title="Fshij foton">✕</button>
+          </div>
+      </div>
+
       <div class="form-group">
-        <label class="form-label" for="f-image">Foto</label>
-        <input class="form-input" id="f-image" type="file" accept="image/*" />
+          <label class="form-label">Ngarko foto</label>
+          <label for="f-image" class="file-upload-label btn btn-outline">
+              <span>Zgjidh skedarin</span>
+          </label>
+          <input class="file-upload-input" id="f-image" type="file" accept="image/*" />
+          <div class="file-upload-name" id="file-upload-name">Asnjë skedar i zgjedhur</div>
       </div>
 
       <div class="form-group">
@@ -198,7 +210,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="f-desc">Përshkrim</label>
+        <label class="form-label" for="f-desc">Përshkrim</labe.l>
         <input class="form-input" id="f-desc" type="text" />
       </div>
 
