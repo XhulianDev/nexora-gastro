@@ -1,9 +1,11 @@
 export const CONFIG = {
     supabaseUrl: 'https://uydjwcfzmsxikjftyngh.supabase.co',
     supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5ZGp3Y2Z6bXN4aWtqZnR5bmdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTc2NjgsImV4cCI6MjA4OTY5MzY2OH0.CfL1KYWcQ0mqzYEft9MOs2079ECYWCyakQKvtxscwX8',
-    statusRefreshIntervalMs: 5000, // 5 sekonda
-    waiterCooldownMs: 30000, // 30 sekonda
-    activeOrdersStorageKey: 'active_orders'
+    statusRefreshIntervalMs: 5000,
+    waiterCooldownMs: 30000,
+    activeOrdersStorageKey: 'active_orders',
+    customerTokenStorageKey: 'customer_token',
+    restaurantId: 1
 };
 
 export const STATUS_MESSAGES = {

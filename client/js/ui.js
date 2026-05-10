@@ -246,9 +246,9 @@ export function toggleHubDropdown() {
  * @param {string} message - Mesazhi për t'u shfaqur.
  * @param {string} type - Tipi i njoftimit ('success' ose 'error').
  */
-export function showToast(message, type = 'error') {
+export function showToast(message, type = 'success') {
   const toast = document.createElement('div');
-  toast.className = `toast-notification ${type === 'error' ? 'is-error' : ''}`;
+  toast.className = `toast-notification is-${type}`;
   toast.textContent = message;
   
   document.body.appendChild(toast);

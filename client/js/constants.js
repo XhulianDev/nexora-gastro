@@ -7,13 +7,17 @@
 export const API = Object.freeze({
   SUPABASE_URL: 'https://uydjwcfzmsxikjftyngh.supabase.co',
   SUPABASE_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5ZGp3Y2Z6bXN4aWtqZnR5bmdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTc2NjgsImV4cCI6MjA4OTY5MzY2OH0.CfL1KYWcQ0mqzYEft9MOs2079ECYWCyakQKvtxscwX8',
-  REFRESH_INTERVAL: 10000, // 10 sekonda
-  WAITER_COOLDOWN: 60000    // 1 minutë
+  REFRESH_INTERVAL: 3000,
+  WAITER_COOLDOWN: 60000,
+  WAITER_MAX_CALLS_PER_WINDOW: 2,
+  RESTAURANT_ID: 1
 });
 
 // 2. Menaxhimi i të Dhënave Lokale (Persistence)
 export const STORAGE = Object.freeze({
-  ACTIVE_ORDERS: 'activeOrdersList',
+  ACTIVE_ORDERS: 'active_orders',
+  CUSTOMER_TOKEN: 'customer_token',
+  ACTIVE_WAITER_CALLS: 'active_waiter_calls',
   DEFAULT_TABLE: 1
 });
 
@@ -40,17 +44,17 @@ export const ORDER_STATUS = Object.freeze({
 
 // 4. Mesazhet e Statusit (UI Feedback)
 export const STATUS_MESSAGES = Object.freeze({
-  new: { 
-    normal: "U dërgua! Së shpejti në punë.", 
-    busy: "U dërgua! Në radhë për t'u përgatitur." 
+  new: {
+    normal: "U dërgua! Së shpejti në punë.",
+    busy: "U dërgua! Në radhë për t'u përgatitur."
   },
-  preparing: { 
-    normal: 'Duke u përgatitur...', 
-    busy: 'Duke u përgatitur...' 
+  preparing: {
+    normal: 'Duke u përgatitur...',
+    busy: 'Duke u përgatitur...'
   },
-  done: { 
-    normal: 'Gati! Ju bëftë mirë.', 
-    busy: 'Gati! Ju bëftë mirë.' 
+  done: {
+    normal: 'Gati! Ju bëftë mirë.',
+    busy: 'Gati! Ju bëftë mirë.'
   }
 });
 

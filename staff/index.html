@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stafi – Urban Bar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/staff/style.css?v=34" />
+</head>
+<body>
+  <main class="staff-shell">
+    <header class="staff-header">
+      <div>
+        <p class="eyebrow">Urban Bar</p>
+        <h1>Paneli i stafit</h1>
+        <p class="sub">Vendosni PIN-in për të hapur panelin operativ. Nëse pajisja nuk është aprovuar ende, kërkesa shfaqet te paneli i menaxherit.</p>
+      </div>
+      <div class="live-pill"><span></span>Live</div>
+    </header>
+
+    <section class="login-card" id="login-card">
+      <h2>Hyrja e stafit</h2>
+      <p>Shkruani PIN-in për të vazhduar.</p>
+      <input id="staff-pin-input" type="password" inputmode="numeric" autocomplete="current-password" placeholder="PIN i stafit" />
+      <button id="staff-login-btn" type="button">Hyr</button>
+      <div class="pending-box" id="pending-box" hidden>
+        <strong>Pajisja pret aprovim.</strong>
+        <span>Hap panelin e menaxherit → Stafi & Pajisjet → Aprovo këtë pajisje.</span>
+      </div>
+      <div class="error" id="login-error"></div>
+    </section>
+
+    <section class="staff-app" id="staff-app" hidden>
+      <div class="toolbar">
+        <div id="zone-filter" class="zone-filter"></div>
+        <div class="staff-actions">
+          <button class="ghost-btn" id="bulk-archive-done-btn" type="button">Arkivo të gatshmet</button>
+          <button class="ghost-btn danger" id="bulk-clear-calls-btn" type="button">Mbyll thirrjet</button>
+          <button class="ghost-btn" id="logout-btn" type="button">Dil</button>
+        </div>
+      </div>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Thirrjet</h2>
+          <span id="calls-count">0</span>
+        </div>
+        <div id="calls-container" class="calls-grid"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Porositë</h2>
+          <span id="orders-count">0</span>
+        </div>
+        <div id="orders-container" class="orders-grid"></div>
+      </section>
+    </section>
+  </main>
+  <div class="toast" id="toast"></div>
+  <script type="module" src="/staff/js/app.js?v=34"></script>
+</body>
+</html>

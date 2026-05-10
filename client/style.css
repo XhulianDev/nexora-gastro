@@ -748,6 +748,12 @@ img {
   opacity: 0;
 }
 
+.toast-notification.is-success {
+    background: #14532d;
+    color: #dcfce7;
+    border-color: #22c55e;
+}
+
 .toast-notification.is-error {
     background: #5a162b;
     color: #ffcedb;
@@ -774,4 +780,21 @@ img {
     opacity: 0;
     transform: translate(-50%, -20px);
   }
+}
+/* Waiter call cancel state */
+.waiter-btn.is-active {
+  background: #3a2a22;
+  color: #f4d8c7;
+  border: 1px solid rgba(240, 149, 106, 0.45);
+}
+
+/* v32 balanced waiter call button */
+.waiter-btn {
+  top: 3.95rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 1.25rem;
+  font-size: 0.88rem;
+  font-weight: 750;
+  background: rgba(255, 255, 255, 0.065);
+  border-color: rgba(255, 255, 255, 0.16);
 }

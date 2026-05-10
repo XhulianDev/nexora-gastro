@@ -17,13 +17,33 @@
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="/admin/style.css" />
+  <link rel="stylesheet" href="/admin/style.css?v=33" />
 </head>
 <body>
-  <div class="layout">
+
+  <section class="auth-screen" id="admin-auth-screen">
+    <div class="auth-card">
+      <div class="auth-kicker">SmartMenu Admin</div>
+      <h1>Hyr në panel</h1>
+      <p>Hyrje vetëm me llogari të autorizuar. Çdo punëtor duhet të ketë user-in e vet.</p>
+
+      <form class="auth-form" id="admin-login-form">
+        <label>Email</label>
+        <input id="admin-email" type="email" autocomplete="email" placeholder="owner@lokali.com" />
+
+        <label>Fjalëkalimi</label>
+        <input id="admin-password" type="password" autocomplete="current-password" placeholder="••••••••" />
+
+        <button class="btn btn-primary" type="submit">Hyr me llogari</button>
+      </form>
+
+      <div class="auth-error" id="auth-error" role="alert"></div>
+    </div>
+  </section>
+  <div class="layout" id="admin-layout" hidden>
     <aside class="sidebar">
       <div class="sidebar-logo">
-        <h2>Urban Bite</h2>
+        <h2>Urban Bar</h2>
         <p>Powered by SmartMenu</p>
       </div>
 
@@ -51,16 +71,42 @@
 
         <button
           class="nav-item"
+          id="nav-archive"
+          type="button"
+          data-page="archive"
+        >
+          <span class="nav-dot"></span>
+          Arkivi
+        </button>
+
+        <button
+          class="nav-item"
+          id="nav-staff-settings"
+          type="button"
+          data-page="staff-settings"
+        >
+          <span class="nav-dot"></span>
+          Stafi & Pajisjet
+        </button>
+
+        <a class="nav-item" href="/staff/" target="_blank" rel="noopener">
+          <span class="nav-dot"></span>
+          Hap Stafin
+        </a>
+
+        <button
+          class="nav-item"
           id="view-live-site-btn"
           type="button"
         >
           <span class="nav-dot"></span>
-          Shiko Faqen e Menysë
+          Shiko Menynë
         </button>
       </nav>
 
       <div class="sidebar-footer">
         <span class="status-dot"></span>Sistemi aktiv
+        <button class="sidebar-logout" id="admin-logout-btn" type="button">Dil</button>
       </div>
     </aside>
 
@@ -69,13 +115,17 @@
         <div class="page-header">
           <div>
             <div class="page-title">Porositë</div>
-            <div class="page-sub">Sot — <span id="orders-time"></span></div>
+            <div class="page-sub">Sot – <span id="orders-time"></span></div>
           </div>
 
-          <div class="realtime-badge">
-            <span class="pulse"></span>Live
+          <div class="page-header-actions">
+            <button class="btn btn-outline" id="admin-bulk-archive-done-btn" type="button">Arkivo të gatshmet</button>
+            <button class="btn btn-red" id="admin-bulk-clear-calls-btn" type="button">Mbyll thirrjet</button>
+            <div class="realtime-badge"><span class="pulse"></span>Live</div>
           </div>
         </div>
+
+        <div class="zone-filter-bar" id="zone-filters" aria-label="Filtro sipas zonës"></div>
 
         <div id="waiter-calls-container" class="waiter-calls-grid"></div>
 
@@ -151,6 +201,117 @@
           </div>
         </div>
       </section>
+
+      <section class="page" id="page-staff-settings">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Stafi & Pajisjet</div>
+            <div class="page-sub">PIN, pajisje të aprovuara dhe kërkesa të reja</div>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <section class="settings-card">
+            <div class="settings-card-header">
+              <div>
+                <h3>PIN i stafit</h3>
+                <p>Ky PIN përdoret vetëm për panelin e stafit. Pajisja duhet të jetë e aprovuar.</p>
+              </div>
+              <span id="staff-pin-status" class="settings-status">Duke kontrolluar...</span>
+            </div>
+
+            <div class="settings-form">
+              <label>
+                PIN i ri (4–8 shifra)
+                <input id="staff-pin-input" class="form-input" type="password" inputmode="numeric" autocomplete="new-password" placeholder="p.sh. 7394" />
+              </label>
+              <label>
+                Qasja orë
+                <input id="staff-session-hours" class="form-input" type="number" min="0" max="72" value="16" />
+              </label>
+              <label>
+                Qasja minuta
+                <input id="staff-session-minutes" class="form-input" type="number" min="0" max="59" value="0" />
+              </label>
+              <label>
+                Pajisja skadon pas ditësh
+                <input id="staff-device-expiry-days" class="form-input" type="number" min="1" max="365" value="30" />
+              </label>
+              <button class="btn btn-primary" id="save-staff-pin-btn" type="button">Ruaj</button>
+            </div>
+          </section>
+
+          <section class="settings-card settings-card--wide">
+            <div class="settings-card-header">
+              <div>
+                <h3>Pajisjet e stafit</h3>
+                <p>Aprovo vetëm pajisjet që lejohen të hapin panelin e stafit. Tipi i pajisjes detektohet automatikisht.</p>
+              </div>
+              <button class="btn btn-outline" id="refresh-devices-btn" type="button">Rifresko</button>
+            </div>
+            <div id="staff-devices-list" class="device-list">
+              <div class="empty-state">Duke ngarkuar pajisjet...</div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="page-archive">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Arkivi</div>
+            <div class="page-sub">Historiku i porosive dhe thirrjeve të mbyllura</div>
+          </div>
+          <div class="page-header-actions">
+            <button class="btn btn-outline" id="refresh-archive-btn" type="button">Rifresko</button>
+            <button class="btn btn-red" id="clear-archive-btn" type="button">Pastro</button>
+          </div>
+        </div>
+
+        <div class="archive-summary-grid">
+          <div class="archive-summary-card">
+            <div class="stat-label">Arkivuar sot</div>
+            <div class="stat-value" id="archive-total-today">0 €</div>
+          </div>
+          <div class="archive-summary-card">
+            <div class="stat-label">Porosi të arkivuara sot</div>
+            <div class="stat-value" id="archive-orders-today">0</div>
+          </div>
+          <div class="archive-summary-card">
+            <div class="stat-label">Totali i arkivuar</div>
+            <div class="stat-value" id="archive-total-archived">0 €</div>
+          </div>
+        </div>
+
+        <div class="archive-grid">
+          <section class="archive-card">
+            <div class="archive-card-header">
+              <div>
+                <h3>Porositë</h3>
+                <p>Vetëm porositë e arkivuara.</p>
+              </div>
+              <span class="settings-status" id="archive-orders-count">0</span>
+            </div>
+            <div id="archive-orders-container" class="archive-list">
+              <div class="empty-state">Duke ngarkuar porositë...</div>
+            </div>
+          </section>
+
+          <section class="archive-card">
+            <div class="archive-card-header">
+              <div>
+                <h3>Thirrjet</h3>
+                <p>Vetëm thirrjet e mbyllura.</p>
+              </div>
+              <span class="settings-status" id="archive-calls-count">0</span>
+            </div>
+            <div id="archive-calls-container" class="archive-list">
+              <div class="empty-state">Duke ngarkuar thirrjet...</div>
+            </div>
+          </section>
+        </div>
+      </section>
+
     </main>
   </div>
 
@@ -185,6 +346,9 @@
           </label>
           <input class="file-upload-input" id="f-image" type="file" accept="image/*" />
           <div class="file-upload-name" id="file-upload-name">Asnjë skedar i zgjedhur</div>
+          <div id="selected-image-container" class="selected-image-container" style="display: none;">
+              <img id="selected-image-preview" src="" alt="Fotoja e zgjedhur" class="selected-image-preview" />
+          </div>
       </div>
 
       <div class="form-group">
@@ -210,7 +374,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label" for="f-desc">Përshkrim</labe.l>
+        <label class="form-label" for="f-desc">Përshkrim</label>
         <input class="form-input" id="f-desc" type="text" />
       </div>
 
@@ -249,6 +413,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script type="module" src="/admin/js/app.js?v=1"></script>
+  <script type="module" src="/admin/js/app.js?v=33"></script>
 </body>
 </html>
