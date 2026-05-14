@@ -134,6 +134,17 @@ export function updateCartBar() {
   }
 
   elements.cartBar?.classList.toggle('visible', totalItems > 0);
+  document.body.classList.toggle('cart-active', totalItems > 0);
+
+  requestAnimationFrame(() => {
+    if (!elements.cartBar || totalItems === 0) {
+      document.documentElement.style.setProperty('--cart-spacer', '0px');
+      return;
+    }
+
+    const cartHeight = elements.cartBar.offsetHeight || 0;
+    document.documentElement.style.setProperty('--cart-spacer', `${cartHeight + 12}px`);
+  });
 }
 
 /**

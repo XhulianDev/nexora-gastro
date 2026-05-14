@@ -247,11 +247,22 @@ async function callWaiter() {
 
 function injectWaiterButton() {
   if (document.querySelector(SELECTORS.waiterButton)) return;
+
   const btn = document.createElement('button');
   btn.id = SELECTORS.waiterButton.substring(1);
   btn.className = 'waiter-btn';
   btn.innerHTML = 'Kamarieri';
   btn.onclick = callWaiter;
-  document.body.appendChild(btn);
+
+  let row = document.querySelector('.waiter-action-row');
+  if (!row) {
+    row = document.createElement('div');
+    row.className = 'waiter-action-row';
+    const header = document.querySelector('.page-header');
+    if (header) header.insertAdjacentElement('afterend', row);
+    else document.body.prepend(row);
+  }
+
+  row.appendChild(btn);
   renderWaiterButton();
 }
