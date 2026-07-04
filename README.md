@@ -1,8 +1,8 @@
-# SmartMenu
+# Nexora Gastro
 
-SmartMenu is a QR-based menu and ordering system for restaurants, cafés, bars, and similar gastronomy businesses.
+Nexora Gastro is an operational digital system for restaurants. It connects the QR menu, table orders, waiter calls, staff workflow, admin controls, and archive into one product.
 
-Customers scan a QR code at their table, view the digital menu, place orders, and call the waiter. Staff manage incoming orders and waiter calls from a tablet or computer, while managers control the menu, staff access, archive, and operational settings from the admin panel.
+The product is positioned for larger restaurants where service work can become slow, unclear, or error-prone when orders and requests are handled only verbally. The goal is not only to show a digital menu, but to reduce unnecessary operational work for customers, waiters, and managers.
 
 ---
 
@@ -28,7 +28,7 @@ Customers scan a QR code at their table, view the digital menu, place orders, an
 ## Project Structure
 
 ```text
-smartmenu/
+nexora-gastro/
 ├── index.html
 ├── admin/
 ├── client/
@@ -194,7 +194,7 @@ Customer calls waiter
 
 ## Notes
 
-SmartMenu is designed as an operational ordering and menu system.  
+Nexora Gastro is designed as an operational restaurant service system.  
 It is not a fiscal/POS replacement.
 
 Fiscal receipts, tax handling, and official payment processing should remain inside the restaurant's existing POS or fiscal system.
@@ -220,3 +220,24 @@ Further improvements can include:
 - custom domains per client
 - multilingual menu support
 - waiter-specific mobile views
+
+
+## Sprint 2.1 — Client Experience Cleanup
+
+Ky sprint përmirëson përvojën e klientit në menynë publike pa ndryshuar backend-in:
+
+- shton loading state për menynë;
+- shton error/empty state kur menuja nuk ngarkohet ose nuk ka artikuj;
+- shton një intro të shkurtër për klientin;
+- përmirëson disa tekste të porosisë.
+
+Objektivi: client-i të mos duket kurrë bosh, i paqartë ose i papërfunduar.
+
+
+## Sprint 2.2 — Staff Operational Clarity
+
+- Added operational summary bar for active calls and order statuses.
+- Added relative time labels for staff order/call cards.
+- Adjusted staff header copy after login to focus on live operations.
+- Made bulk actions visually calmer without changing behavior.
+- No backend changes.

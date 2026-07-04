@@ -82,6 +82,12 @@ function handleGlobalClicks(event) {
     return;
   }
 
+  const retryMenuBtn = target.closest(`[data-action="${ACTIONS.RETRY_MENU}"]`);
+  if (retryMenuBtn) {
+    initMenu();
+    return;
+  }
+
   const hubDrop = document.querySelector('#hub-drop');
   if (hubDrop?.classList.contains('is-open') && !target.closest('.status-hub')) {
     hubDrop.classList.remove('is-open');
@@ -89,6 +95,8 @@ function handleGlobalClicks(event) {
 }
 
 async function initMenu() {
+  ui.renderMenuLoading();
+
   try {
     state.menu = await fetchActiveMenu();
     ui.renderCategories();
@@ -96,7 +104,10 @@ async function initMenu() {
     ui.updateCartBar();
   } catch (error) {
     console.error('Gabim në menunë:', error);
-    ui.showToast('Gabim në ngarkimin e menysë. Provoni sërish.', 'error');
+    state.menu = [];
+    ui.renderCategories();
+    ui.renderMenuError();
+    ui.showToast('Menuja nuk u ngarkua. Provoni sërish ose thërrisni kamarierin.', 'error');
   }
 }
 

@@ -249,7 +249,7 @@ function startFallbackPolling() {
 
 function setupEventListeners() {
   document.getElementById('view-live-site-btn')?.addEventListener('click', () => {
-    window.location.href = '/';
+    window.open('/client/?table=1', '_blank', 'noopener');
   });
 
   ui.elements.menuSearchInput?.addEventListener('input', (event) => {

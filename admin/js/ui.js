@@ -63,20 +63,28 @@ function callStatusLabel(call) {
   return call?.status === 'acknowledged' ? 'Pranuar' : 'E re';
 }
 
-function formatElapsedSince(value) {
+function formatElapsedSince(value, label = 'Pranuar') {
+  if (!value) return '';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return 'Pranuar';
+  if (Number.isNaN(date.getTime())) return '';
   const diffMs = Math.max(0, Date.now() - date.getTime());
-  const minutes = Math.max(1, Math.floor(diffMs / 60000));
-  if (minutes < 60) return `Pranuar prej ${minutes} min`;
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return `${label} tani`;
+  if (minutes < 60) return `${label} prej ${minutes} min`;
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
-  return rest ? `Pranuar prej ${hours} orë ${rest} min` : `Pranuar prej ${hours} orë`;
+  return rest ? `${label} prej ${hours}h ${rest}min` : `${label} prej ${hours}h`;
+}
+
+function orderTimeMeta(order) {
+  if (order?.status === 'preparing') return formatElapsedSince(order.updated_at || order.created_at, 'Pranuar');
+  if (order?.status === 'done') return formatElapsedSince(order.updated_at || order.created_at, 'Gati');
+  return formatElapsedSince(order?.created_at, 'Porositur');
 }
 
 function callTimeMeta(call) {
-  if (call?.status === 'acknowledged') return formatElapsedSince(call.updated_at || call.created_at);
-  return `E dërguar ${utils.formatTime(call?.created_at)}`;
+  if (call?.status === 'acknowledged') return formatElapsedSince(call.updated_at || call.created_at, 'Pranuar');
+  return formatElapsedSince(call?.created_at, 'Dërguar');
 }
 
 function callStatusClass(call) {
@@ -180,14 +188,16 @@ export const ui = {
       const items = parseItems(order.items);
       return `
         <article class="order-card ${STATUS_CLASSES[order.status] || ''}">
-          <div class="order-card-header">
-            <div>
-              <div class="order-title">Porosia #${utils.escape(String(order.id))}</div>
-              <div class="order-meta">Tavolina ${utils.escape(String(order.table_number || '-'))} · ${utils.formatTime(order.created_at)}</div>
-              <div class="order-zone-row">${zoneBadge(order)}</div>
+          <header class="order-card-header staff-card-head">
+            <div class="staff-card-left">
+              <h3 class="order-title">Porosia #${utils.escape(String(order.id))}</h3>
+              <p class="order-meta">Tavolina ${utils.escape(String(order.table_number || '-'))} · ${utils.escape(getZoneLabel(order))}</p>
             </div>
-            <span class="status-pill ${STATUS_CLASSES[order.status] || ''}">${STATUS_LABELS[order.status] || utils.escape(order.status || '—')}</span>
-          </div>
+            <div class="staff-card-right">
+              <span class="status-pill ${STATUS_CLASSES[order.status] || ''}">${STATUS_LABELS[order.status] || utils.escape(order.status || '—')}</span>
+              <strong>${utils.escape(orderTimeMeta(order))}</strong>
+            </div>
+          </header>
 
           <div class="order-items">
             ${items.map((item) => `
@@ -309,32 +319,35 @@ export const ui = {
     }
 
     container.innerHTML = [...groups.entries()].map(([table, group]) => {
-      const sorted = group.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      const sorted = [...group].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       const lastCall = sorted[0];
-
       const countLabel = sorted.length === 1 ? '1 thirrje' : `${sorted.length} thirrje`;
-      return `
-        <div class="waiter-call-card waiter-call-card--grouped waiter-call-card--${utils.escape(lastCall.status || 'new')}">
-          <div class="waiter-call-main">
-            <div>
-              <h3 class="waiter-call-title">Tavolina ${utils.escape(table)}</h3>
-              <p class="waiter-call-time">${getZoneLabel(lastCall)} · ${countLabel} · ${utils.formatTime(lastCall.created_at)}</p>
-            </div>
-            <span class="waiter-call-count ${callStatusClass(lastCall)}">${callStatusLabel(lastCall)}</span>
-          </div>
 
-          <div class="waiter-call-list">
+      return `
+        <article class="call-card call-card--${utils.escape(lastCall.status || 'new')}">
+          <header class="call-card-header staff-card-head">
+            <div class="staff-card-left">
+              <h3>Tavolina ${utils.escape(table)}</h3>
+              <p class="call-meta">${utils.escape(getZoneLabel(lastCall))} · ${countLabel}</p>
+            </div>
+            <div class="staff-card-right">
+              <span class="call-status ${callStatusClass(lastCall)}">${callStatusLabel(lastCall)}</span>
+              <strong>${utils.escape(callTimeMeta(lastCall))}</strong>
+            </div>
+          </header>
+
+          <div class="call-card-body">
             ${sorted.map((call) => `
-              <div class="waiter-call-row waiter-call-row--${utils.escape(call.status || 'new')}">
+              <div class="call-row call-row--${utils.escape(call.status || 'new')}">
                 <div>
                   <strong>${callStatusLabel(call)}</strong>
-                  <span>${callTimeMeta(call)}</span>
+                  <span>${utils.escape(callTimeMeta(call))}</span>
                 </div>
                 ${callActionHTML(call)}
               </div>
             `).join('')}
           </div>
-        </div>
+        </article>
       `;
     }).join('');
   },

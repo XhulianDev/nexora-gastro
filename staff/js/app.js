@@ -2,9 +2,9 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { CONFIG } from '../../admin/js/config.js';
 
 const RESTAURANT_ID = 1;
-const DEVICE_ID_KEY = 'smartmenu_staff_device_id';
-const SESSION_KEY = 'smartmenu_staff_session';
-const SESSION_EXP_KEY = 'smartmenu_staff_session_expires_at';
+const DEVICE_ID_KEY = 'nexora_gastro_staff_device_id';
+const SESSION_KEY = 'nexora_gastro_staff_session';
+const SESSION_EXP_KEY = 'nexora_gastro_staff_session_expires_at';
 const ZONES = [
   { id: 'all', label: 'Të gjitha', range: '' },
   { id: 'A', label: 'Zona A', range: '1–5' },
@@ -93,13 +93,20 @@ function formatCountdown(ms) {
   return `${minutes}:${seconds}`;
 }
 
-function formatElapsedSince(value) {
+function formatElapsedSince(value, label = 'Pranuar') {
   if (!value) return '';
-  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - new Date(value).getTime()) / 1000));
+  const timestamp = new Date(value).getTime();
+  if (Number.isNaN(timestamp)) return '';
+  const elapsedSeconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000));
   const minutes = Math.floor(elapsedSeconds / 60);
-  if (minutes < 1) return 'Pranuar tani';
-  if (minutes === 1) return 'Pranuar prej 1 min';
-  return `Pranuar prej ${minutes} min`;
+  if (minutes < 1) return `${label} tani`;
+  if (minutes === 1) return `${label} prej 1 min`;
+  const hours = Math.floor(minutes / 60);
+  if (hours >= 1) {
+    const remaining = minutes % 60;
+    return remaining ? `${label} prej ${hours}h ${remaining}min` : `${label} prej ${hours}h`;
+  }
+  return `${label} prej ${minutes} min`;
 }
 
 function showPersistentSessionWarning(msLeft) {
@@ -195,6 +202,25 @@ function renderZoneFilter() {
   `).join('');
 }
 
+function renderSummary() {
+  const visibleOrders = filterByZone(state.orders);
+  const visibleCalls = filterByZone(state.calls);
+  const stats = [
+    { label: 'Porosi të reja', value: visibleOrders.filter((order) => order.status === 'new').length, tone: 'danger' },
+    { label: 'Në përgatitje', value: visibleOrders.filter((order) => order.status === 'preparing').length, tone: 'warning' },
+    { label: 'Gati', value: visibleOrders.filter((order) => order.status === 'done').length, tone: 'success' },
+    { label: 'Thirrje aktive', value: visibleCalls.length, tone: 'accent' },
+  ];
+  const summary = $('staff-summary');
+  if (!summary) return;
+  summary.innerHTML = stats.map((stat) => `
+    <div class="summary-card summary-card--${stat.tone}">
+      <span>${escapeHTML(stat.label)}</span>
+      <strong>${stat.value}</strong>
+    </div>
+  `).join('');
+}
+
 function groupCallsByTable(calls) {
   const grouped = new Map();
   for (const call of calls.map(withZone)) {
@@ -214,8 +240,8 @@ function getCallStatusClass(call) {
 }
 
 function getCallTimeMeta(call) {
-  if (call.status === 'acknowledged') return formatElapsedSince(call.updated_at || call.created_at);
-  return `E dërguar ${formatTime(call.created_at)}`;
+  if (call.status === 'acknowledged') return formatElapsedSince(call.updated_at || call.created_at, 'Pranuar');
+  return formatElapsedSince(call.created_at, 'Dërguar');
 }
 
 function getCallActions(call) {
@@ -234,11 +260,16 @@ function renderCalls() {
     return `
       <article class="call-card call-card--${escapeHTML(latest.status || 'new')}">
         <header class="call-card-header">
-          <div>
-            <h3>Tavolina ${escapeHTML(group.table)}</h3>
-            <p>${escapeHTML(group.zone)} · ${group.calls.length === 1 ? '1 thirrje' : `${group.calls.length} thirrje`} · ${formatTime(latest.created_at)}</p>
+          <div class="call-head-main staff-card-head">
+            <div class="staff-card-left">
+              <h3>Tavolina ${escapeHTML(group.table)}</h3>
+              <p>${escapeHTML(group.zone)} · ${group.calls.length === 1 ? '1 thirrje' : `${group.calls.length} thirrje`}</p>
+            </div>
+            <div class="staff-card-right">
+              <span class="call-status ${getCallStatusClass(latest)}">${getCallLabel(latest)}</span>
+              <strong>${escapeHTML(formatElapsedSince(latest.created_at, 'Dërguar'))}</strong>
+            </div>
           </div>
-          <span class="call-status ${getCallStatusClass(latest)}">${getCallLabel(latest)}</span>
         </header>
         <div class="call-card-body">
           ${group.calls.map((call) => `
@@ -256,6 +287,13 @@ function renderCalls() {
   }).join('');
 }
 
+function getOrderStatusLabel(status) {
+  if (status === 'new') return 'E re';
+  if (status === 'preparing') return 'Në përgatitje';
+  if (status === 'done') return 'Gati';
+  return status || '-';
+}
+
 function getStatusButton(order) {
   if (order.status === 'new') return `<button class="btn-next-preparing" data-action="status" data-id="${order.id}" data-status="preparing" type="button">Në përgatitje</button>`;
   if (order.status === 'preparing') return `<button class="btn-next-done" data-action="status" data-id="${order.id}" data-status="done" type="button">E gatshme</button>`;
@@ -271,7 +309,7 @@ function renderOrders() {
     const canClose = order.status === 'done';
     return `
       <article class="order-card status-${escapeHTML(order.status)}">
-        <header><div><h3>Porosia #${escapeHTML(order.id)}</h3><p>Tavolina ${escapeHTML(order.table_number)} · ${escapeHTML(order.zone_label)} · ${formatTime(order.created_at)}</p></div><span>${escapeHTML(order.status)}</span></header>
+        <header class="order-head"><div class="order-head-main staff-card-head"><div class="staff-card-left"><h3>Porosia #${escapeHTML(order.id)}</h3><p>Tavolina ${escapeHTML(order.table_number)} · ${escapeHTML(order.zone_label)}</p></div><div class="staff-card-right"><span class="order-status-pill">${escapeHTML(getOrderStatusLabel(order.status))}</span><strong>${escapeHTML(formatElapsedSince(order.created_at, 'Porositur'))}</strong></div></div></header>
         <div class="items">${items.map((item) => `<div><span>${escapeHTML(item.qty || 1)}× ${escapeHTML(item.name || 'Artikull')}</span><strong>${formatMoney((item.qty || 1) * (item.price || 0))}</strong></div>`).join('')}</div>
         ${order.note ? `<p class="note">${escapeHTML(order.note)}</p>` : ''}
         <footer><strong>${formatMoney(order.total)}</strong><div>${getStatusButton(order)}${canClose ? `<button class="outline danger" data-action="archive-order" data-id="${order.id}" type="button">Arkivo</button>` : ''}</div></footer>
@@ -280,10 +318,18 @@ function renderOrders() {
   }).join('');
 }
 
-function render() { renderZoneFilter(); renderCalls(); renderOrders(); updateBulkActions(); }
+function render() { renderZoneFilter(); renderSummary(); renderCalls(); renderOrders(); updateBulkActions(); }
 
 function updateScreenMode() {
-  document.body.classList.toggle('is-login-mode', Boolean($('login-card') && !$('login-card').hidden));
+  const isLogin = Boolean($('login-card') && !$('login-card').hidden);
+  document.body.classList.toggle('is-login-mode', isLogin);
+  document.body.classList.toggle('is-staff-mode', !isLogin);
+  const sub = document.querySelector('.staff-header .sub');
+  if (sub) {
+    sub.textContent = isLogin
+      ? 'Vendosni PIN-in për të hapur panelin operativ. Nëse pajisja nuk është aprovuar ende, kërkesa shfaqet te paneli i menaxherit.'
+      : 'Monitoroni thirrjet, porositë dhe statuset aktive në kohë reale.';
+  }
 }
 function showToast(message, isError = false) { const toast = $('toast'); toast.textContent = message; toast.className = 'toast show ' + (isError ? 'error' : ''); setTimeout(() => { if (!toast.classList.contains('warning')) toast.className = 'toast'; }, 2500); }
 

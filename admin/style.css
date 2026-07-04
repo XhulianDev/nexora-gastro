@@ -135,7 +135,7 @@ body {
   flex: 1;
   min-width: 0;
   overflow-x: hidden;
-  padding: var(--space-8) var(--space-7);
+  padding: var(--space-8) var(--space-5);
 }
 
 .page {
@@ -2085,4 +2085,193 @@ body {
   border: 1px solid rgba(var(--color-red-rgb),0.25) !important;
   background: transparent !important;
   color: rgba(var(--color-red-rgb),0.95) !important;
+}
+
+/* Sprint 3.4 — align admin order/call cards with staff card organization */
+.staff-card-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  grid-template-rows: auto auto;
+  column-gap: var(--space-3);
+  row-gap: 0.35rem;
+  align-items: center;
+  width: 100%;
+}
+
+.staff-card-left,
+.staff-card-right {
+  display: contents;
+}
+
+.staff-card-left h3 {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.staff-card-left p {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: center;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.staff-card-right .status-pill,
+.staff-card-right .call-status {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  align-self: center;
+}
+
+.staff-card-right > strong {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.055);
+  color: var(--color-text-muted);
+  padding: 0.22rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.status-pill,
+.call-status {
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.order-card-header.staff-card-head {
+  display: grid;
+}
+
+.call-card {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(36, 34, 32, 0.82), rgba(26, 25, 23, 0.96));
+  box-shadow: var(--shadow-card);
+  transition: border-color var(--transition-base), transform var(--transition-base);
+}
+
+.call-card:hover {
+  border-color: var(--color-border-hover);
+}
+
+.call-card--new {
+  border-color: rgba(var(--color-red-rgb), 0.30);
+  background: linear-gradient(180deg, rgba(var(--color-red-rgb), 0.08), rgba(26, 25, 23, 0.96));
+  box-shadow: inset 0 0.1875rem 0 rgba(var(--color-red-rgb), 0.42), var(--shadow-card);
+}
+
+.call-card--acknowledged {
+  border-color: rgba(var(--color-yellow-rgb), 0.28);
+  background: linear-gradient(180deg, rgba(var(--color-yellow-rgb), 0.08), rgba(26, 25, 23, 0.96));
+  box-shadow: inset 0 0.1875rem 0 rgba(var(--color-yellow-rgb), 0.42), var(--shadow-card);
+}
+
+.call-card-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.015);
+  padding: var(--space-4);
+}
+
+.call-card-header h3 {
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.call-status {
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-muted);
+  padding: 0.3125rem 0.6875rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.call-status.status-new {
+  color: var(--color-red);
+  background: var(--status-new-bg);
+}
+
+.call-status.status-preparing {
+  color: var(--color-yellow);
+  background: var(--status-preparing-bg);
+}
+
+.call-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: var(--space-4);
+}
+
+.call-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.025);
+  padding: var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.call-row strong {
+  display: block;
+  color: var(--color-text);
+  font-size: 0.875rem;
+}
+
+.call-row span {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.call-row .btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 25rem) {
+  .staff-card-head {
+    gap: var(--space-2);
+  }
+
+  .staff-card-right > strong,
+  .status-pill,
+  .call-status {
+    padding-inline: 0.45rem;
+    font-size: 0.66rem;
+  }
 }

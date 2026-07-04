@@ -1,5 +1,5 @@
 /**
- * URBAN BITE - Global Constants & Configuration
+ * NEXORA GASTRO - Global Constants & Configuration
  * Ky skedar përmban të gjitha vlerat statike të aplikacionit.
  */
 
@@ -15,9 +15,9 @@ export const API = Object.freeze({
 
 // 2. Menaxhimi i të Dhënave Lokale (Persistence)
 export const STORAGE = Object.freeze({
-  ACTIVE_ORDERS: 'active_orders',
-  CUSTOMER_TOKEN: 'customer_token',
-  ACTIVE_WAITER_CALLS: 'active_waiter_calls',
+  ACTIVE_ORDERS: 'nexora_gastro_active_orders',
+  CUSTOMER_TOKEN: 'nexora_gastro_customer_token',
+  ACTIVE_WAITER_CALLS: 'nexora_gastro_active_waiter_calls',
   DEFAULT_TABLE: 1
 });
 
@@ -83,5 +83,6 @@ export const ACTIONS = Object.freeze({
   UPSELL_ADD: 'upsell-add',
   SEND_ORDER: 'send-order',
   TOGGLE_HUB: 'toggle-hub',
-  VIEW_ALL_STATUS: 'view-all-status'
+  VIEW_ALL_STATUS: 'view-all-status',
+  RETRY_MENU: 'retry-menu'
 });

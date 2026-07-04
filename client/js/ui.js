@@ -56,15 +56,66 @@ function renderCategoryButton(category, label, isActive) {
     </button>`;
 }
 
+export function renderMenuLoading() {
+  if (!elements.categoryBar || !elements.menuList) return;
+
+  elements.categoryBar.hidden = true;
+  elements.menuList.innerHTML = `
+    <section class="menu-state menu-state--loading" aria-live="polite">
+      <div class="menu-state__badge">Menuja</div>
+      <h2>Duke ngarkuar menynë...</h2>
+      <p>Ju lutemi prisni pak. Po marrim artikujt aktivë të restorantit.</p>
+      <div class="menu-skeleton" aria-hidden="true">
+        <div></div><div></div><div></div>
+      </div>
+    </section>
+  `;
+}
+
+export function renderMenuError() {
+  if (!elements.menuList) return;
+
+  elements.menuList.innerHTML = `
+    <section class="menu-state menu-state--error" role="alert">
+      <div class="menu-state__badge">Njoftim</div>
+      <h2>Menuja nuk u ngarkua.</h2>
+      <p>Provoni përsëri. Nëse problemi vazhdon, thërrisni kamarierin nga tavolina.</p>
+      <button class="button button--primary menu-state__action" type="button" data-action="retry-menu">Provo përsëri</button>
+    </section>
+  `;
+}
+
+export function renderEmptyMenu() {
+  if (!elements.menuList) return;
+
+  elements.menuList.innerHTML = `
+    <section class="menu-state">
+      <div class="menu-state__badge">Menuja</div>
+      <h2>Nuk ka artikuj të disponueshëm.</h2>
+      <p>Ju lutemi thërrisni kamarierin për ndihmë ose provoni përsëri më vonë.</p>
+    </section>
+  `;
+}
+
 /**
  * Renderon listën e produkteve të grupuara sipas kategorive.
  */
 export function renderMenu() {
   if (!elements.menuList) return;
 
+  if (!state.menu.length) {
+    renderEmptyMenu();
+    return;
+  }
+
   const filteredMenu = state.activeCategory === 'all' 
     ? state.menu 
     : state.menu.filter(item => item.category === state.activeCategory);
+
+  if (!filteredMenu.length) {
+    renderEmptyMenu();
+    return;
+  }
 
   const categoriesInView = [...new Set(filteredMenu.map(item => item.category).filter(Boolean))];
 
@@ -203,9 +254,9 @@ export function renderModalContent() {
         </div>
       </div>` : ''}
 
-    <textarea id="note" class="note-field" placeholder="Shënim për kuzhinën..."></textarea>
+    <textarea id="note" class="note-field" placeholder="Shënim për porosinë, p.sh. pa qepë, ekstra salcë..."></textarea>
     <button id="send-btn" class="button button--primary confirm-btn" data-action="send-order">
-      DËRGO POROSINË (${formatMoney(total)})
+      Dërgo porosinë (${formatMoney(total)})
     </button>
   `;
 }

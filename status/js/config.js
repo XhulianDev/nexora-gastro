@@ -3,8 +3,8 @@ export const CONFIG = {
     supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV5ZGp3Y2Z6bXN4aWtqZnR5bmdoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTc2NjgsImV4cCI6MjA4OTY5MzY2OH0.CfL1KYWcQ0mqzYEft9MOs2079ECYWCyakQKvtxscwX8',
     statusRefreshIntervalMs: 5000,
     waiterCooldownMs: 30000,
-    activeOrdersStorageKey: 'active_orders',
-    customerTokenStorageKey: 'customer_token',
+    activeOrdersStorageKey: 'nexora_gastro_active_orders',
+    customerTokenStorageKey: 'nexora_gastro_customer_token',
     restaurantId: 1
 };
 

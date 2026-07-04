@@ -23,9 +23,9 @@ button, input { font: inherit; }
 button { cursor: pointer; }
 [hidden] { display: none !important; }
 
-.staff-shell { width: min(78rem, calc(100% - 2rem)); margin: 0 auto; padding: 1.5rem 0 3rem; }
+.staff-shell { width: min(80rem, calc(100% - 2rem)); margin: 0 auto; padding: 1.5rem 0 3rem; }
 .staff-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
-.eyebrow { color: var(--accent-soft); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.eyebrow { color: var(--accent-soft); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: none; }
 h1 { margin-top: 0.25rem; font-size: clamp(1.75rem, 4vw, 2.5rem); letter-spacing: -0.04em; }
 .sub { margin-top: 0.35rem; color: var(--muted); }
 .live-pill { display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid rgba(76, 175, 125, 0.2); border-radius: 999px; background: rgba(76, 175, 125, 0.08); color: var(--green); padding: 0.45rem 0.8rem; font-size: 0.8rem; font-weight: 700; }
@@ -53,6 +53,19 @@ h1 { margin-top: 0.25rem; font-size: clamp(1.75rem, 4vw, 2.5rem); letter-spacing
 .ghost-btn:hover:not(:disabled) { color: var(--text); border-color: rgba(255,255,255,0.18); }
 .ghost-btn.danger { color: rgba(217,95,95,0.95); border-color: rgba(217,95,95,0.25); }
 .ghost-btn:disabled { cursor: not-allowed; opacity: 0.45; }
+body.is-staff-mode .staff-actions .ghost-btn { padding: 0.48rem 0.72rem; font-size: 0.8rem; opacity: 0.82; }
+body.is-staff-mode .staff-actions .ghost-btn:hover:not(:disabled) { opacity: 1; }
+body.is-staff-mode .staff-header { align-items: center; }
+body.is-staff-mode .staff-header .sub { max-width: 34rem; }
+
+.summary-bar { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.75rem; margin: 0 0 1rem; }
+.summary-card { border: 1px solid var(--border); border-radius: 0.8rem; background: linear-gradient(180deg, rgba(36,34,32,0.88), rgba(26,25,23,0.96)); padding: 0.85rem 0.9rem; box-shadow: 0 0.65rem 1.35rem rgba(0,0,0,0.10); }
+.summary-card span { display: block; color: var(--muted); font-size: 0.76rem; font-weight: 700; letter-spacing: 0.02em; }
+.summary-card strong { display: block; margin-top: 0.2rem; color: var(--text); font-size: 1.55rem; line-height: 1; letter-spacing: -0.04em; }
+.summary-card--danger { border-color: rgba(var(--red-rgb),0.22); }
+.summary-card--warning { border-color: rgba(var(--yellow-rgb),0.22); }
+.summary-card--success { border-color: rgba(var(--green-rgb),0.22); }
+.summary-card--accent { border-color: rgba(200,98,42,0.26); }
 
 .panel { margin-top: 1rem; padding: 1rem; }
 .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
@@ -68,7 +81,7 @@ h1 { margin-top: 0.25rem; font-size: clamp(1.75rem, 4vw, 2.5rem); letter-spacing
 .order-card header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; border-bottom: 1px solid var(--border); padding: 0.9rem; }
 .order-card h3, .call-card h3 { font-size: 1rem; }
 .order-card p, .call-card p { margin-top: 0.25rem; color: var(--muted); font-size: 0.82rem; }
-.order-card header span { border-radius: 999px; background: rgba(255,255,255,0.05); color: var(--muted); padding: 0.25rem 0.55rem; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+.order-card header span { border-radius: 999px; background: rgba(255,255,255,0.05); color: var(--muted); padding: 0.25rem 0.55rem; font-size: 0.7rem; font-weight: 800; text-transform: none; }
 .items { display: flex; flex-direction: column; gap: 0.45rem; padding: 0.9rem; }
 .items div { display: flex; justify-content: space-between; gap: 0.75rem; color: rgba(240,237,232,0.85); }
 .items strong { color: var(--muted); white-space: nowrap; }
@@ -94,10 +107,13 @@ h1 { margin-top: 0.25rem; font-size: clamp(1.75rem, 4vw, 2.5rem); letter-spacing
 .toast.error { color: var(--red); border-color: rgba(217,95,95,0.35); }
 
 @media (max-width: 48rem) {
-  .staff-shell { width: min(100% - 1rem, 78rem); padding-top: 1rem; }
+  .staff-shell { width: min(100% - 1rem, 80rem); padding-top: 1rem; }
   .staff-header, .toolbar { flex-direction: column; align-items: stretch; }
   .staff-actions { justify-content: stretch; }
   .staff-actions .ghost-btn { flex: 1 1 auto; }
+  .summary-bar { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.55rem; }
+  .summary-card { padding: 0.75rem; }
+  .summary-card strong { font-size: 1.35rem; }
   .orders-grid, .calls-grid { grid-template-columns: 1fr; }
 }
 
@@ -161,7 +177,7 @@ body.is-login-mode .login-card {
   padding: 0.25rem 0.55rem;
   font-size: 0.7rem;
   font-weight: 800;
-  text-transform: uppercase;
+  text-transform: none;
 }
 .call-status.status-new { color: var(--red); background: rgba(var(--red-rgb),0.10); }
 .call-status.status-preparing { color: var(--yellow); background: rgba(var(--yellow-rgb),0.10); }
@@ -282,4 +298,260 @@ body.is-login-mode .login-card p {
 /* v34 logout button balance */
 #logout-btn {
   padding-inline: 1.15rem;
+}
+
+/* Sprint 2.2.1 — staff time/status polish */
+.order-card header > span,
+.call-status {
+  white-space: nowrap;
+  min-width: max-content;
+  line-height: 1;
+  text-align: center;
+}
+.order-meta,
+.call-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.55rem;
+}
+.order-meta strong,
+.call-meta strong {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.07);
+  color: var(--accent-soft);
+  padding: 0.18rem 0.5rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+.order-card button,
+.call-action-ack,
+.call-action-close,
+.small-danger {
+  white-space: nowrap;
+  line-height: 1.1;
+}
+@media (max-width: 25rem) {
+  .order-card header,
+  .call-card-header {
+    gap: 0.65rem;
+  }
+  .order-card header > span,
+  .call-status {
+    padding-inline: 0.48rem;
+    font-size: 0.66rem;
+  }
+  .order-card button,
+  .call-action-ack,
+  .call-action-close,
+  .small-danger {
+    padding-inline: 0.62rem;
+    font-size: 0.78rem;
+  }
+}
+
+/* Sprint 2.2.2 — align order meta with title */
+.order-card .order-head {
+  align-items: flex-start;
+}
+.order-head-main {
+  min-width: 0;
+  width: 100%;
+}
+.order-card .order-meta {
+  margin-top: 0.45rem;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.order-card .order-status-pill {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.07);
+  color: var(--muted);
+  padding: 0.18rem 0.5rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.order-card header.order-head > span {
+  display: none;
+}
+
+/* Sprint 2.2.3 — status badge aligned with order title */
+.order-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+}
+.order-title-row h3 {
+  min-width: 0;
+}
+.order-title-row .order-status-pill {
+  flex: 0 0 auto;
+}
+@media (max-width: 25rem) {
+  .order-title-row {
+    gap: 0.55rem;
+  }
+  .order-title-row .order-status-pill {
+    padding-inline: 0.48rem;
+    font-size: 0.66rem;
+  }
+}
+
+
+/* Sprint 2.2.4 — call status aligned with call title */
+.call-card-header {
+  align-items: flex-start;
+}
+.call-head-main {
+  min-width: 0;
+  width: 100%;
+}
+.call-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+}
+.call-title-row h3 {
+  min-width: 0;
+}
+.call-title-row .call-status {
+  flex: 0 0 auto;
+}
+@media (max-width: 25rem) {
+  .call-title-row {
+    gap: 0.55rem;
+  }
+  .call-title-row .call-status {
+    padding-inline: 0.48rem;
+    font-size: 0.66rem;
+  }
+}
+
+/* Sprint 2.2.5 — align time badge to opposite edge */
+.order-meta,
+.call-meta {
+  justify-content: space-between;
+  width: 100%;
+}
+.order-meta > span,
+.call-meta > span {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.order-meta > strong,
+.call-meta > strong {
+  flex: 0 0 auto;
+  margin-left: auto;
+}
+@media (max-width: 25rem) {
+  .order-meta,
+  .call-meta {
+    gap: 0.4rem;
+  }
+  .order-meta > strong,
+  .call-meta > strong {
+    font-size: 0.68rem;
+    padding-inline: 0.45rem;
+  }
+}
+
+/* Sprint 2.2.6 — align right-column text endings */
+.order-title-row,
+.call-title-row,
+.order-meta,
+.call-meta {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: center;
+  column-gap: 0.75rem;
+  width: 100%;
+}
+.order-title-row .order-status-pill,
+.call-title-row .call-status,
+.order-meta > strong,
+.call-meta > strong {
+  justify-self: end;
+  text-align: right;
+  white-space: nowrap;
+}
+.order-meta > span,
+.call-meta > span,
+.order-title-row h3,
+.call-title-row h3 {
+  min-width: 0;
+}
+@media (max-width: 25rem) {
+  .order-title-row,
+  .call-title-row,
+  .order-meta,
+  .call-meta {
+    column-gap: 0.5rem;
+  }
+}
+
+/* Sprint 2.2.7 — status/time as one right-side column */
+.staff-card-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  align-items: start;
+  gap: 0.75rem;
+  width: 100%;
+}
+.staff-card-left {
+  min-width: 0;
+}
+.staff-card-left h3 {
+  margin: 0;
+}
+.staff-card-left p {
+  margin-top: 0.28rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.staff-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+  min-width: max-content;
+  text-align: right;
+}
+.staff-card-right > strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.055);
+  color: var(--muted);
+  padding: 0.22rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+.staff-card-right .order-status-pill,
+.staff-card-right .call-status {
+  white-space: nowrap;
+}
+@media (max-width: 25rem) {
+  .staff-card-head {
+    gap: 0.55rem;
+  }
+  .staff-card-right > strong {
+    font-size: 0.66rem;
+    padding-inline: 0.45rem;
+  }
 }
