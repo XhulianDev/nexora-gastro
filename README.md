@@ -17,7 +17,7 @@ The product is positioned for larger restaurants where service work can become s
 - Order status flow: `new → preparing → done → archived`
 - Waiter call flow: `new → acknowledged → closed`
 - Archive for completed orders and closed waiter calls
-- Daily revenue overview
+- Daily order activity and value overview
 - Table zones for staff organization
 - Staff PIN access with trusted device approval
 - Supabase authentication for admin users
@@ -203,7 +203,7 @@ Fiscal receipts, tax handling, and official payment processing should remain ins
 
 ## Status
 
-Current version: demo-ready MVP.
+Current version: Demo Release Candidate.
 
 The system is ready for:
 
@@ -220,24 +220,3 @@ Further improvements can include:
 - custom domains per client
 - multilingual menu support
 - waiter-specific mobile views
-
-
-## Sprint 2.1 — Client Experience Cleanup
-
-Ky sprint përmirëson përvojën e klientit në menynë publike pa ndryshuar backend-in:
-
-- shton loading state për menynë;
-- shton error/empty state kur menuja nuk ngarkohet ose nuk ka artikuj;
-- shton një intro të shkurtër për klientin;
-- përmirëson disa tekste të porosisë.
-
-Objektivi: client-i të mos duket kurrë bosh, i paqartë ose i papërfunduar.
-
-
-## Sprint 2.2 — Staff Operational Clarity
-
-- Added operational summary bar for active calls and order statuses.
-- Added relative time labels for staff order/call cards.
-- Adjusted staff header copy after login to focus on live operations.
-- Made bulk actions visually calmer without changing behavior.
-- No backend changes.
