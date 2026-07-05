@@ -481,14 +481,14 @@ async function handleGlobalClick(event) {
       return;
     }
 
-    if (action === 'revoke-staff-device') {
-      const confirmed = await ui.confirm({ title: 'Revoko pajisjen?', message: 'Kjo pajisje nuk do të mund të përdorë më Staff Mode pa aprovim të ri.', confirmText: 'Revoko', icon: '📱' });
+    if (action === 'delete-staff-device') {
+      const confirmed = await ui.confirm({ title: 'Hiq pajisjen?', message: 'Pajisja hiqet nga lista dhe humb qasjen në Staff Mode. Nëse stafi provon përsëri, do të kërkohet aprovim i ri.', confirmText: 'Hiq', icon: '📱', danger: true });
       if (!confirmed) return;
       await runAction(async () => {
-        await api.revokeStaffDevice(actionElement.dataset.deviceId);
-        ui.showToast('Pajisja u revokua.', 'error');
+        await api.deleteStaffDevice(actionElement.dataset.deviceId);
+        ui.showToast('Pajisja u hoq.', 'error');
         await refreshData();
-      }, 'Pajisja nuk u revokua.');
+      }, 'Pajisja nuk u hoq.');
       return;
     }
 

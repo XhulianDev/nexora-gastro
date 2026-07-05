@@ -44,6 +44,16 @@ function normalizeDeviceMeta(value: unknown) {
   return { device_type: type, browser_name: browser, os_name: os, user_agent: userAgent };
 }
 function isExpired(value?: string | null) { return Boolean(value && new Date(value).getTime() < Date.now()); }
+async function cleanupStaffDevices(supabase: any, restaurantId: number) {
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  await supabase
+    .from('staff_devices')
+    .delete()
+    .eq('restaurant_id', restaurantId)
+    .in('status', ['pending', 'revoked'])
+    .lt('updated_at', cutoff)
+    .then(() => null);
+}
 
 async function softDelete(supabase: any, table: string, id: number, restaurantId: number) {
   const { error } = await supabase.from(table).update({ deleted_at: new Date().toISOString() }).eq('id', id).eq('restaurant_id', restaurantId);
@@ -143,12 +153,27 @@ async function handleStaffLogin(supabase: any, body: JsonRecord) {
   if (!settings?.pin_hash) return errorResponse('Staff PIN nuk është konfiguruar ende nga menaxheri.', 403);
   if (await hashPin(pin, restaurantId) !== settings.pin_hash) return errorResponse('PIN i gabuar.', 401);
 
+  await cleanupStaffDevices(supabase, restaurantId);
+
   const { data: existing, error: existingError } = await supabase.from('staff_devices').select('*').eq('restaurant_id', restaurantId).eq('device_id', deviceId).maybeSingle();
   if (existingError) throw existingError;
   const device = existing as StaffDevice | null;
 
   if (!device) {
-    const { data, error } = await supabase.from('staff_devices').insert({ restaurant_id: restaurantId, device_id: deviceId, label, status: 'pending', ...deviceMeta }).select('id, status, created_at').single();
+    const { data, error } = await supabase
+      .from('staff_devices')
+      .upsert({
+        restaurant_id: restaurantId,
+        device_id: deviceId,
+        label,
+        status: 'pending',
+        ...deviceMeta,
+        session_token_hash: null,
+        session_expires_at: null,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'restaurant_id,device_id' })
+      .select('id, status, created_at')
+      .single();
     if (error) throw error;
     await writeStaffAudit(supabase, restaurantId, 'staff.device.request', 'staff_devices', null, { deviceId, label, ...deviceMeta });
     return json({ error: 'DEVICE_PENDING', data, message: 'Kjo pajisje pret aprovimin e menaxherit.' }, 403);
@@ -487,6 +512,7 @@ Deno.serve(async (req) => {
 
       case 'getStaffDevices': {
         assertAdminRole(admin, ['owner', 'manager', 'supervisor']);
+        await cleanupStaffDevices(supabase, restaurantId);
         const { data, error } = await supabase.from('staff_devices').select('id, device_id, label, status, device_type, browser_name, os_name, approved_at, expires_at, last_seen_at, created_at, updated_at').eq('restaurant_id', restaurantId).order('updated_at', { ascending: false });
         if (error) throw error;
         const now = new Date();
@@ -518,6 +544,28 @@ Deno.serve(async (req) => {
         const { error } = await supabase.from('staff_devices').update({ status: 'revoked', session_token_hash: null, session_expires_at: null, updated_at: new Date().toISOString() }).eq('id', id).eq('restaurant_id', restaurantId);
         if (error) throw error;
         await writeAuditLog(supabase, admin, 'staff.device.revoke', 'staff_devices', null, { id });
+        return json({ data: true });
+      }
+
+      case 'deleteStaffDevice': {
+        assertAdminRole(admin, ['owner', 'manager', 'supervisor']);
+        const id = String(body.id || '').trim();
+        if (!id) return errorResponse('Invalid device id', 400);
+        const { data: device, error: readError } = await supabase
+          .from('staff_devices')
+          .select('id, device_id, label, status')
+          .eq('id', id)
+          .eq('restaurant_id', restaurantId)
+          .maybeSingle();
+        if (readError) throw readError;
+        if (!device) return errorResponse('Device not found', 404);
+        const { error } = await supabase
+          .from('staff_devices')
+          .delete()
+          .eq('id', id)
+          .eq('restaurant_id', restaurantId);
+        if (error) throw error;
+        await writeAuditLog(supabase, admin, 'staff.device.delete', 'staff_devices', null, { id, deviceId: device.device_id, label: device.label, status: device.status });
         return json({ data: true });
       }
 

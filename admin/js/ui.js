@@ -587,19 +587,20 @@ export const ui = {
     container.innerHTML = safeDevices.map((device) => {
       const status = String(device.status || 'pending');
       const canApprove = status === 'pending';
-      const canRevoke = status !== 'revoked';
+      const statusLabels = { pending: 'Në pritje', approved: 'Aprovuar', revoked: 'Revokuar' };
+      const removeLabel = status === 'approved' ? 'Hiq qasjen' : 'Fshi';
       return `
         <article class="device-card device-card--${utils.escape(status)}">
           <div>
             <div class="device-title">${utils.escape(device.label || 'Pajisje stafi')}</div>
             <div class="device-meta">${utils.escape(device.device_type || 'unknown')} · ${utils.escape(device.browser_name || 'Browser')} · ${utils.escape(device.os_name || 'Unknown OS')}</div>
             <div class="device-meta">ID: ${utils.escape(String(device.device_id || '').slice(0, 18))}...</div>
-            <div class="device-meta">Status: ${utils.escape(status)} · Last seen: ${device.last_seen_at ? utils.formatTime(device.last_seen_at) : '-'}</div>
+            <div class="device-meta">Statusi: ${utils.escape(statusLabels[status] || status)} · Aktiviteti i fundit: ${device.last_seen_at ? utils.formatTime(device.last_seen_at) : '-'}</div>
             <div class="device-meta">Skadon: ${device.expires_at ? new Date(device.expires_at).toLocaleDateString('sq-AL') : '-'}</div>
           </div>
           <div class="device-actions">
             ${canApprove ? `<button class="btn btn-small" data-action="approve-staff-device" data-device-id="${device.id}">Aprovo</button>` : ''}
-            ${canRevoke ? `<button class="btn btn-small btn-outline danger" data-action="revoke-staff-device" data-device-id="${device.id}">Revoko</button>` : ''}
+            <button class="btn btn-small btn-outline danger" data-action="delete-staff-device" data-device-id="${device.id}">${removeLabel}</button>
           </div>
         </article>
       `;

@@ -114,5 +114,6 @@ async function updateStaffPin({ pin, sessionHours, sessionMinutes, deviceExpiryD
 async function getStaffDevices() { return callAdminApi('getStaffDevices'); }
 async function approveStaffDevice(id) { return callAdminApi('approveStaffDevice', { id }); }
 async function revokeStaffDevice(id) { return callAdminApi('revokeStaffDevice', { id }); }
+async function deleteStaffDevice(id) { return callAdminApi('deleteStaffDevice', { id }); }
 
-export const api = { signIn, signOut, hasAuthSession, getCurrentAdmin, uploadMenuImage, deleteMenuImage, getMenu, deleteMenuItem, saveMenuItem, getOrders, getCalls, getArchive, clearArchive, getZones, updateStatus, deleteOrder, deleteCall, getStaffSettings, updateStaffPin, getStaffDevices, approveStaffDevice, revokeStaffDevice, acknowledgeCall, archiveDoneOrders, archiveWaiterCalls };
+export const api = { signIn, signOut, hasAuthSession, getCurrentAdmin, uploadMenuImage, deleteMenuImage, getMenu, deleteMenuItem, saveMenuItem, getOrders, getCalls, getArchive, clearArchive, getZones, updateStatus, deleteOrder, deleteCall, getStaffSettings, updateStaffPin, getStaffDevices, approveStaffDevice, revokeStaffDevice, deleteStaffDevice, acknowledgeCall, archiveDoneOrders, archiveWaiterCalls };
