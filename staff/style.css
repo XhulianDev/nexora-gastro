@@ -72,6 +72,7 @@ body.is-staff-mode .staff-header .sub { max-width: 34rem; }
 .panel-header h2 { font-size: 1.05rem; }
 .panel-header span { border-radius: 999px; background: rgba(255,255,255,0.06); color: var(--muted); padding: 0.25rem 0.65rem; font-weight: 700; }
 .orders-grid, .calls-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr)); gap: 0.85rem; }
+.orders-grid { align-items: start; }
 .empty { grid-column: 1 / -1; color: var(--muted); padding: 1.25rem; text-align: center; }
 
 .order-card, .call-card { overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); box-shadow: 0 0.75rem 1.75rem rgba(0,0,0,0.12); }
@@ -570,4 +571,83 @@ body.is-login-mode .login-card p {
 .call-card--help .call-card-header,
 .call-row--help {
   background: rgba(255, 255, 255, 0.018);
+}
+
+/* Sprint 5.2 — table-based order grouping */
+.table-order-card {
+  background: linear-gradient(180deg, rgba(36,34,32,0.82), rgba(26,25,23,0.96));
+}
+
+.table-order-head {
+  border-bottom: 1px solid var(--border);
+}
+
+.table-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0.9rem;
+}
+
+.table-order-item {
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.065);
+  border-radius: 0.75rem;
+  background: rgba(255,255,255,0.025);
+}
+
+.table-order-item.status-new {
+  border-color: rgba(var(--red-rgb),0.20);
+  background: rgba(var(--red-rgb),0.045);
+}
+
+.table-order-item.status-preparing {
+  border-color: rgba(var(--yellow-rgb),0.18);
+  background: rgba(var(--yellow-rgb),0.04);
+}
+
+.table-order-item.status-done {
+  border-color: rgba(var(--green-rgb),0.18);
+  background: rgba(var(--green-rgb),0.04);
+}
+
+.table-order-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.8rem 0;
+}
+
+.table-order-item-head strong {
+  display: block;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.table-order-item-head span:not(.order-status-pill) {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--muted);
+  font-size: 0.74rem;
+}
+
+.table-order-items {
+  padding: 0.7rem 0.8rem;
+}
+
+.table-order-note {
+  margin-inline: 0.8rem;
+}
+
+.table-order-footer {
+  padding: 0.7rem 0.8rem !important;
+}
+
+@media (max-width: 25rem) {
+  .table-order-item-head,
+  .table-order-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }

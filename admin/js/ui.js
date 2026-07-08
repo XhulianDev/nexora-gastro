@@ -80,6 +80,46 @@ function formatElapsedSince(value, label = 'Pranuar') {
   return rest ? `${label} prej ${hours}h ${rest}min` : `${label} prej ${hours}h`;
 }
 
+
+function getOrderGroupStatus(orders = []) {
+  if (orders.some((order) => order.status === 'new')) return 'new';
+  if (orders.some((order) => order.status === 'preparing')) return 'preparing';
+  return 'done';
+}
+
+function getOrderGroupTime(orders = []) {
+  const latest = [...orders].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))[0];
+  return latest ? formatElapsedSince(latest.created_at, 'Aktive') : '';
+}
+
+function groupOrdersByTable(orders = []) {
+  const groups = new Map();
+  for (const order of orders) {
+    const table = String(order.table_number || '-');
+    if (!groups.has(table)) groups.set(table, []);
+    groups.get(table).push(order);
+  }
+
+  return [...groups.entries()]
+    .map(([table, groupOrders]) => {
+      const sorted = [...groupOrders].sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+      const latest = [...groupOrders].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))[0];
+      return {
+        table,
+        orders: sorted,
+        latest,
+        zone: getZoneLabel(sorted[0]),
+        status: getOrderGroupStatus(sorted),
+      };
+    })
+    .sort((a, b) => {
+      const priority = { new: 0, preparing: 1, done: 2 };
+      const byStatus = (priority[a.status] ?? 3) - (priority[b.status] ?? 3);
+      if (byStatus !== 0) return byStatus;
+      return new Date(b.latest?.created_at || 0) - new Date(a.latest?.created_at || 0);
+    });
+}
+
 function orderTimeMeta(order) {
   if (order?.status === 'preparing') return formatElapsedSince(order.updated_at || order.created_at, 'Pranuar');
   if (order?.status === 'done') return formatElapsedSince(order.updated_at || order.created_at, 'Gati');
@@ -188,35 +228,52 @@ export const ui = {
       return;
     }
 
-    container.innerHTML = filteredOrders.map((order) => {
-      const items = parseItems(order.items);
+    container.innerHTML = groupOrdersByTable(filteredOrders).map((group) => {
+      const countLabel = group.orders.length === 1 ? '1 porosi aktive' : `${group.orders.length} porosi aktive`;
       return `
-        <article class="order-card ${STATUS_CLASSES[order.status] || ''}">
-          <header class="order-card-header staff-card-head">
+        <article class="order-card table-order-card ${STATUS_CLASSES[group.status] || ''}">
+          <header class="order-card-header staff-card-head table-order-head">
             <div class="staff-card-left">
-              <h3 class="order-title">Porosia #${utils.escape(String(order.id))}</h3>
-              <p class="order-meta">Tavolina ${utils.escape(String(order.table_number || '-'))} · ${utils.escape(getZoneLabel(order))}</p>
+              <h3 class="order-title">Tavolina ${utils.escape(group.table)}</h3>
+              <p class="order-meta">${utils.escape(group.zone)} · ${countLabel}</p>
             </div>
             <div class="staff-card-right">
-              <span class="status-pill ${STATUS_CLASSES[order.status] || ''}">${STATUS_LABELS[order.status] || utils.escape(order.status || '—')}</span>
-              <strong>${utils.escape(orderTimeMeta(order))}</strong>
+              <span class="status-pill ${STATUS_CLASSES[group.status] || ''}">${STATUS_LABELS[group.status] || '—'}</span>
+              <strong>${utils.escape(getOrderGroupTime(group.orders))}</strong>
             </div>
           </header>
 
-          <div class="order-items">
-            ${items.map((item) => `
-              <div class="order-item">
-                <span>${utils.escape(String(item.qty))}× ${utils.escape(item.name)}</span>
-                <strong>${utils.formatMoney(item.qty * item.price)}</strong>
-              </div>
-            `).join('')}
-          </div>
+          <div class="table-order-list">
+            ${group.orders.map((order) => {
+              const items = parseItems(order.items);
+              return `
+                <section class="table-order-item ${STATUS_CLASSES[order.status] || ''}">
+                  <div class="table-order-item-head">
+                    <div>
+                      <strong>Porosia #${utils.escape(String(order.id))}</strong>
+                      <span>${utils.escape(orderTimeMeta(order))}</span>
+                    </div>
+                    <span class="status-pill ${STATUS_CLASSES[order.status] || ''}">${STATUS_LABELS[order.status] || utils.escape(order.status || '—')}</span>
+                  </div>
 
-          ${order.note ? `<div class="order-note">${utils.escape(order.note)}</div>` : ''}
+                  <div class="order-items table-order-items">
+                    ${items.map((item) => `
+                      <div class="order-item">
+                        <span>${utils.escape(String(item.qty))}× ${utils.escape(item.name)}</span>
+                        <strong>${utils.formatMoney(item.qty * item.price)}</strong>
+                      </div>
+                    `).join('')}
+                  </div>
 
-          <div class="order-footer">
-            <strong>${utils.formatMoney(order.total)}</strong>
-            <div class="order-actions">${ui._getOrderActionsHTML(order)}</div>
+                  ${order.note ? `<div class="order-note table-order-note">${utils.escape(order.note)}</div>` : ''}
+
+                  <div class="order-footer table-order-footer">
+                    <strong>${utils.formatMoney(order.total)}</strong>
+                    <div class="order-actions">${ui._getOrderActionsHTML(order)}</div>
+                  </div>
+                </section>
+              `;
+            }).join('')}
           </div>
         </article>
       `;

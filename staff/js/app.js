@@ -301,6 +301,51 @@ function renderCalls() {
   }).join('');
 }
 
+
+function getOrderTimeMeta(order) {
+  if (order.status === 'preparing') return formatElapsedSince(order.updated_at || order.created_at, 'Pranuar');
+  if (order.status === 'done') return formatElapsedSince(order.updated_at || order.created_at, 'Gati');
+  return formatElapsedSince(order.created_at, 'Porositur');
+}
+
+function getOrderGroupStatus(orders) {
+  if (orders.some((order) => order.status === 'new')) return 'new';
+  if (orders.some((order) => order.status === 'preparing')) return 'preparing';
+  return 'done';
+}
+
+function getOrderGroupTime(orders) {
+  const latest = [...orders].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))[0];
+  return latest ? formatElapsedSince(latest.created_at, 'Aktive') : '';
+}
+
+function groupOrdersByTable(orders) {
+  const grouped = new Map();
+  for (const order of orders.map(withZone)) {
+    const table = String(order.table_number || '-');
+    if (!grouped.has(table)) grouped.set(table, []);
+    grouped.get(table).push(order);
+  }
+  return [...grouped.entries()]
+    .map(([table, orders]) => {
+      const sorted = [...orders].sort((a, b) => new Date(a.created_at || 0) - new Date(b.created_at || 0));
+      const latest = [...orders].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0))[0];
+      return {
+        table,
+        orders: sorted,
+        latest,
+        zone: sorted[0]?.zone_label || getZone(table).label,
+        status: getOrderGroupStatus(sorted),
+      };
+    })
+    .sort((a, b) => {
+      const priority = { new: 0, preparing: 1, done: 2 };
+      const byStatus = (priority[a.status] ?? 3) - (priority[b.status] ?? 3);
+      if (byStatus !== 0) return byStatus;
+      return new Date(b.latest?.created_at || 0) - new Date(a.latest?.created_at || 0);
+    });
+}
+
 function getOrderStatusLabel(status) {
   if (status === 'new') return 'E re';
   if (status === 'preparing') return 'Në përgatitje';
@@ -318,15 +363,43 @@ function renderOrders() {
   const orders = filterByZone(state.orders);
   $('orders-count').textContent = orders.length;
   if (!orders.length) { $('orders-container').innerHTML = '<div class="empty">Nuk ka porosi aktive në këtë zonë.</div>'; return; }
-  $('orders-container').innerHTML = orders.map((order) => {
-    const items = parseItems(order.items);
-    const canClose = order.status === 'done';
+
+  $('orders-container').innerHTML = groupOrdersByTable(orders).map((group) => {
+    const countLabel = group.orders.length === 1 ? '1 porosi aktive' : `${group.orders.length} porosi aktive`;
     return `
-      <article class="order-card status-${escapeHTML(order.status)}">
-        <header class="order-head"><div class="order-head-main staff-card-head"><div class="staff-card-left"><h3>Porosia #${escapeHTML(order.id)}</h3><p>Tavolina ${escapeHTML(order.table_number)} · ${escapeHTML(order.zone_label)}</p></div><div class="staff-card-right"><span class="order-status-pill">${escapeHTML(getOrderStatusLabel(order.status))}</span><strong>${escapeHTML(formatElapsedSince(order.created_at, 'Porositur'))}</strong></div></div></header>
-        <div class="items">${items.map((item) => `<div><span>${escapeHTML(item.qty || 1)}× ${escapeHTML(item.name || 'Artikull')}</span><strong>${formatMoney((item.qty || 1) * (item.price || 0))}</strong></div>`).join('')}</div>
-        ${order.note ? `<p class="note">${escapeHTML(order.note)}</p>` : ''}
-        <footer><strong>${formatMoney(order.total)}</strong><div>${getStatusButton(order)}${canClose ? `<button class="outline danger" data-action="archive-order" data-id="${order.id}" type="button">Arkivo</button>` : ''}</div></footer>
+      <article class="order-card table-order-card status-${escapeHTML(group.status)}">
+        <header class="order-head table-order-head">
+          <div class="order-head-main staff-card-head">
+            <div class="staff-card-left">
+              <h3>Tavolina ${escapeHTML(group.table)}</h3>
+              <p>${escapeHTML(group.zone)} · ${countLabel}</p>
+            </div>
+            <div class="staff-card-right">
+              <span class="order-status-pill">${escapeHTML(getOrderStatusLabel(group.status))}</span>
+              <strong>${escapeHTML(getOrderGroupTime(group.orders))}</strong>
+            </div>
+          </div>
+        </header>
+        <div class="table-order-list">
+          ${group.orders.map((order) => {
+            const items = parseItems(order.items);
+            const canClose = order.status === 'done';
+            return `
+              <section class="table-order-item status-${escapeHTML(order.status)}">
+                <div class="table-order-item-head">
+                  <div>
+                    <strong>Porosia #${escapeHTML(order.id)}</strong>
+                    <span>${escapeHTML(getOrderTimeMeta(order))}</span>
+                  </div>
+                  <span class="order-status-pill">${escapeHTML(getOrderStatusLabel(order.status))}</span>
+                </div>
+                <div class="items table-order-items">${items.map((item) => `<div><span>${escapeHTML(item.qty || 1)}× ${escapeHTML(item.name || 'Artikull')}</span><strong>${formatMoney((item.qty || 1) * (item.price || 0))}</strong></div>`).join('')}</div>
+                ${order.note ? `<p class="note table-order-note">${escapeHTML(order.note)}</p>` : ''}
+                <footer class="table-order-footer"><strong>${formatMoney(order.total)}</strong><div>${getStatusButton(order)}${canClose ? `<button class="outline danger" data-action="archive-order" data-id="${order.id}" type="button">Arkivo</button>` : ''}</div></footer>
+              </section>
+            `;
+          }).join('')}
+        </div>
       </article>
     `;
   }).join('');

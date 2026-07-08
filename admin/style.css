@@ -539,6 +539,7 @@ body {
 .orders-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+  align-items: start;
   gap: var(--space-4);
   min-width: 0;
 }
@@ -2290,4 +2291,83 @@ body {
 .call-card--help .call-card-header,
 .call-row--help {
   background: rgba(255, 255, 255, 0.018);
+}
+
+/* Sprint 5.2 — table-based order grouping */
+.table-order-card {
+  background: linear-gradient(180deg, rgba(36, 34, 32, 0.82), rgba(26, 25, 23, 0.96));
+}
+
+.table-order-head {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.table-order-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.table-order-item {
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.065);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.table-order-item.status-new {
+  border-color: rgba(var(--color-red-rgb), 0.20);
+  background: rgba(var(--color-red-rgb), 0.045);
+}
+
+.table-order-item.status-preparing {
+  border-color: rgba(var(--color-yellow-rgb), 0.18);
+  background: rgba(var(--color-yellow-rgb), 0.04);
+}
+
+.table-order-item.status-done {
+  border-color: rgba(var(--color-green-rgb), 0.18);
+  background: rgba(var(--color-green-rgb), 0.04);
+}
+
+.table-order-item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) 0;
+}
+
+.table-order-item-head strong {
+  display: block;
+  color: var(--color-text);
+  font-size: 0.92rem;
+}
+
+.table-order-item-head span:not(.status-pill) {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--color-text-muted);
+  font-size: 0.74rem;
+}
+
+.table-order-items {
+  padding: var(--space-3);
+}
+
+.table-order-note {
+  margin-inline: var(--space-3);
+}
+
+.table-order-footer {
+  padding: var(--space-3) !important;
+}
+
+@media (max-width: 25rem) {
+  .table-order-item-head,
+  .table-order-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
 }
