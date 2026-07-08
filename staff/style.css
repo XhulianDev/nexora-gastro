@@ -555,3 +555,19 @@ body.is-login-mode .login-card p {
     padding-inline: 0.45rem;
   }
 }
+
+/* Sprint 5.1 correction — separate help/payment call cards */
+.call-card--payment .call-card-header,
+.call-row--payment {
+  background: rgba(var(--green-rgb), 0.055);
+}
+
+.call-card--payment .call-card-header p,
+.call-row--payment strong {
+  color: var(--green);
+}
+
+.call-card--help .call-card-header,
+.call-row--help {
+  background: rgba(255, 255, 255, 0.018);
+}

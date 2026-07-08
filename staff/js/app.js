@@ -225,10 +225,24 @@ function groupCallsByTable(calls) {
   const grouped = new Map();
   for (const call of calls.map(withZone)) {
     const table = String(call.table_number || '-');
-    if (!grouped.has(table)) grouped.set(table, []);
-    grouped.get(table).push(call);
+    const type = call.call_type === 'payment' ? 'payment' : 'help';
+    const key = `${table}:${type}`;
+    if (!grouped.has(key)) grouped.set(key, []);
+    grouped.get(key).push(call);
   }
-  return [...grouped.entries()].map(([table, calls]) => ({ table, calls, latest: calls[0], zone: calls[0].zone_label }));
+  return [...grouped.values()]
+    .map((calls) => ({
+      table: String(calls[0].table_number || '-'),
+      callType: calls[0].call_type === 'payment' ? 'payment' : 'help',
+      calls,
+      latest: calls[0],
+      zone: calls[0].zone_label
+    }))
+    .sort((a, b) => new Date(b.latest.created_at) - new Date(a.latest.created_at));
+}
+
+function getCallTypeLabel(call) {
+  return call.call_type === 'payment' ? 'Pagesë' : 'Ndihmë';
 }
 
 function getCallLabel(call) {
@@ -258,24 +272,24 @@ function renderCalls() {
   $('calls-container').innerHTML = groupCallsByTable(calls).map((group) => {
     const latest = group.latest;
     return `
-      <article class="call-card call-card--${escapeHTML(latest.status || 'new')}">
+      <article class="call-card call-card--${escapeHTML(latest.status || 'new')} call-card--${escapeHTML(group.callType)}">
         <header class="call-card-header">
           <div class="call-head-main staff-card-head">
             <div class="staff-card-left">
-              <h3>Tavolina ${escapeHTML(group.table)}</h3>
+              <h3>Tavolina ${escapeHTML(group.table)} · ${escapeHTML(getCallTypeLabel(latest))}</h3>
               <p>${escapeHTML(group.zone)} · ${group.calls.length === 1 ? '1 thirrje' : `${group.calls.length} thirrje`}</p>
             </div>
             <div class="staff-card-right">
               <span class="call-status ${getCallStatusClass(latest)}">${getCallLabel(latest)}</span>
-              <strong>${escapeHTML(formatElapsedSince(latest.created_at, 'Dërguar'))}</strong>
+              <strong>${escapeHTML(getCallTimeMeta(latest))}</strong>
             </div>
           </div>
         </header>
         <div class="call-card-body">
           ${group.calls.map((call) => `
-            <div class="call-row call-row--${escapeHTML(call.status || 'new')}">
+            <div class="call-row call-row--${escapeHTML(call.status || 'new')} call-row--${escapeHTML(call.call_type === 'payment' ? 'payment' : 'help')}">
               <div>
-                <strong>${getCallLabel(call)}</strong>
+                <strong>${escapeHTML(getCallTypeLabel(call))} · ${getCallLabel(call)}</strong>
                 <span>${escapeHTML(getCallTimeMeta(call))}</span>
               </div>
               ${getCallActions(call)}

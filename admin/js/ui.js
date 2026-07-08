@@ -59,6 +59,10 @@ function uniqueById(rows = []) {
 }
 
 
+function callTypeLabel(call) {
+  return call?.call_type === 'payment' ? 'Pagesë' : 'Ndihmë';
+}
+
 function callStatusLabel(call) {
   return call?.status === 'acknowledged' ? 'Pranuar' : 'E re';
 }
@@ -314,20 +318,24 @@ export const ui = {
     const groups = new Map();
     for (const call of filteredCalls) {
       const table = String(call.table_number || '-');
-      if (!groups.has(table)) groups.set(table, []);
-      groups.get(table).push(call);
+      const type = call.call_type === 'payment' ? 'payment' : 'help';
+      const key = `${table}:${type}`;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(call);
     }
 
-    container.innerHTML = [...groups.entries()].map(([table, group]) => {
+    container.innerHTML = [...groups.values()].map((group) => {
       const sorted = [...group].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
       const lastCall = sorted[0];
+      const table = String(lastCall.table_number || '-');
+      const type = lastCall.call_type === 'payment' ? 'payment' : 'help';
       const countLabel = sorted.length === 1 ? '1 thirrje' : `${sorted.length} thirrje`;
 
       return `
-        <article class="call-card call-card--${utils.escape(lastCall.status || 'new')}">
+        <article class="call-card call-card--${utils.escape(lastCall.status || 'new')} call-card--${utils.escape(type)}">
           <header class="call-card-header staff-card-head">
             <div class="staff-card-left">
-              <h3>Tavolina ${utils.escape(table)}</h3>
+              <h3>Tavolina ${utils.escape(table)} · ${utils.escape(callTypeLabel(lastCall))}</h3>
               <p class="call-meta">${utils.escape(getZoneLabel(lastCall))} · ${countLabel}</p>
             </div>
             <div class="staff-card-right">
@@ -338,9 +346,9 @@ export const ui = {
 
           <div class="call-card-body">
             ${sorted.map((call) => `
-              <div class="call-row call-row--${utils.escape(call.status || 'new')}">
+              <div class="call-row call-row--${utils.escape(call.status || 'new')} call-row--${utils.escape(call.call_type === 'payment' ? 'payment' : 'help')}">
                 <div>
-                  <strong>${callStatusLabel(call)}</strong>
+                  <strong>${utils.escape(callTypeLabel(call))} · ${callStatusLabel(call)}</strong>
                   <span>${utils.escape(callTimeMeta(call))}</span>
                 </div>
                 ${callActionHTML(call)}

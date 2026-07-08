@@ -2275,3 +2275,19 @@ body {
     font-size: 0.66rem;
   }
 }
+
+/* Sprint 5.1 correction — separate help/payment call cards */
+.call-card--payment .call-card-header,
+.call-row--payment {
+  background: rgba(var(--color-green-rgb), 0.055);
+}
+
+.call-card--payment .call-card-header p,
+.call-row--payment strong {
+  color: var(--color-green);
+}
+
+.call-card--help .call-card-header,
+.call-row--help {
+  background: rgba(255, 255, 255, 0.018);
+}

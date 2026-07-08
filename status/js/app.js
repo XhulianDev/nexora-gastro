@@ -9,12 +9,15 @@ const state = {
   showAll: new URLSearchParams(window.location.search).get('all') === 'true',
   tableNumber: null,
   isInitialLoad: true,
+  activeCalls: {},
 };
 
 const elements = {
   mainContent: document.getElementById('main-content'),
   backButton: document.getElementById('btn-back'),
-  waiterButton: document.getElementById('waiter-btn'),
+  waiterRow: document.getElementById('waiter-action-row'),
+  waiterToggle: document.getElementById('waiter-menu-toggle'),
+  waiterMenu: document.getElementById('waiter-action-menu'),
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -50,8 +53,31 @@ async function callCustomerApi(action, payload = {}) {
 
 function initEvents() {
   elements.backButton?.addEventListener('click', handleBackNavigation);
-  elements.waiterButton?.addEventListener('click', handleWaiterCall);
+  document.addEventListener('click', handleDocumentClick);
   elements.mainContent?.addEventListener('click', handleActionClicks);
+}
+
+function handleDocumentClick(event) {
+  const target = event.target;
+
+  const toggleBtn = target.closest('[data-action="toggle-waiter-menu"]');
+  if (toggleBtn) {
+    event.stopPropagation();
+    toggleWaiterMenu();
+    return;
+  }
+
+  const callBtn = target.closest('[data-action="call-waiter"]');
+  if (callBtn) {
+    event.preventDefault();
+    event.stopPropagation();
+    handleWaiterCall(callBtn.dataset.callType || callBtn.dataset.call_type || 'help');
+    return;
+  }
+
+  if (elements.waiterMenu && !elements.waiterMenu.hidden && !target.closest('.waiter-action-row')) {
+    closeWaiterMenu();
+  }
 }
 
 async function refreshCycle() {
@@ -71,6 +97,7 @@ async function refreshCycle() {
   try {
     const result = await callCustomerApi('getOrders', { ids: idsToFetch });
     updateUI(result.data || [], activeIds, Boolean(result.meta?.isBusy));
+    await syncWaiterCalls();
   } catch (error) {
     console.error('[Status Error] Fetch failed:', error);
     if (state.isInitialLoad) {
@@ -89,7 +116,7 @@ function updateUI(orders, activeIds, isBusy) {
 
   state.tableNumber = orders[0].table_number;
   ui.toggleElement(elements.backButton, true);
-  ui.toggleElement(elements.waiterButton, !!state.tableNumber);
+  ui.toggleElement(elements.waiterRow, !!state.tableNumber);
 
   if (orders.length === 1 && !state.showAll) {
     elements.mainContent.classList.add('single-mode');
@@ -101,23 +128,121 @@ function updateUI(orders, activeIds, isBusy) {
   elements.mainContent.innerHTML = ui.renderMultipleOrders(orders, activeIds, isBusy);
 }
 
-function handleBackNavigation() {
-  const target = state.tableNumber ? `../index.html?table=${state.tableNumber}` : '../index.html';
-  window.location.href = target;
+function normalizeCallType(value) {
+  return String(value || 'help') === 'payment' ? 'payment' : 'help';
 }
 
-async function handleWaiterCall() {
-  if (!state.tableNumber || elements.waiterButton.disabled) return;
+function getCallTypeLabel(type) {
+  return normalizeCallType(type) === 'payment' ? 'Pagesë' : 'Ndihmë';
+}
 
-  ui.setWaiterLoading(elements.waiterButton, true);
+function getCallTypeCancelLabel(type) {
+  return normalizeCallType(type) === 'payment' ? 'Anulo pagesën' : 'Anulo ndihmën';
+}
+
+function setActiveCalls(calls = []) {
+  const next = {};
+  for (const call of Array.isArray(calls) ? calls : []) {
+    if (!call?.id || call.status !== 'new') continue;
+    next[normalizeCallType(call.call_type)] = call;
+  }
+  state.activeCalls = next;
+}
+
+async function syncWaiterCalls() {
+  if (!state.tableNumber) return;
 
   try {
-    await callCustomerApi('callWaiter', { tableNumber: state.tableNumber });
-    setTimeout(() => ui.setWaiterLoading(elements.waiterButton, false), CONFIG.waiterCooldownMs);
+    const result = await callCustomerApi('getActiveWaiterCalls', { tableNumber: state.tableNumber });
+    setActiveCalls(result.data || []);
+  } catch (error) {
+    console.warn('[Status waiter calls] Sync failed:', error);
+  }
+
+  renderWaiterButtons();
+}
+
+function closeWaiterMenu() {
+  if (!elements.waiterMenu || !elements.waiterToggle) return;
+  elements.waiterMenu.hidden = true;
+  elements.waiterToggle.setAttribute('aria-expanded', 'false');
+}
+
+function toggleWaiterMenu() {
+  if (!elements.waiterMenu || !elements.waiterToggle) return;
+  const nextOpen = elements.waiterMenu.hidden;
+  elements.waiterMenu.hidden = !nextOpen;
+  elements.waiterToggle.setAttribute('aria-expanded', String(nextOpen));
+  if (nextOpen) renderWaiterButtons();
+}
+
+function getWaiterButtons(type = null) {
+  const selector = type
+    ? `[data-action="call-waiter"][data-call-type="${normalizeCallType(type)}"]`
+    : '[data-action="call-waiter"]';
+  return [...document.querySelectorAll(selector)];
+}
+
+function renderWaiterButtons() {
+  const buttons = getWaiterButtons();
+  if (!buttons.length) return;
+
+  buttons.forEach((btn) => {
+    const type = normalizeCallType(btn.dataset.callType);
+    const activeCall = state.activeCalls[type];
+    btn.classList.toggle('is-active', Boolean(activeCall?.id));
+
+    if (activeCall?.id) {
+      if (activeCall.can_cancel === false) {
+        btn.textContent = `${getCallTypeLabel(type)} u dërgua`;
+        btn.disabled = true;
+        return;
+      }
+
+      btn.textContent = getCallTypeCancelLabel(type);
+      btn.disabled = false;
+      return;
+    }
+
+    btn.textContent = getCallTypeLabel(type);
+    btn.disabled = false;
+  });
+}
+
+async function handleWaiterCall(callType = 'help') {
+  if (!state.tableNumber) return;
+
+  const type = normalizeCallType(callType);
+  const buttons = getWaiterButtons(type);
+  if (buttons.some((btn) => btn.disabled)) return;
+
+  const activeCall = state.activeCalls[type];
+
+  buttons.forEach((btn) => {
+    btn.disabled = true;
+    btn.textContent = activeCall?.id ? 'Duke anuluar...' : 'Duke dërguar...';
+  });
+
+  try {
+    if (activeCall?.id) {
+      await callCustomerApi('cancelWaiterCall', { id: activeCall.id, tableNumber: state.tableNumber });
+      delete state.activeCalls[type];
+      renderWaiterButtons();
+      return;
+    }
+
+    const result = await callCustomerApi('callWaiter', { tableNumber: state.tableNumber, callType: type, call_type: type });
+    if (result.data?.id) state.activeCalls[type] = result.data;
+    renderWaiterButtons();
   } catch (error) {
     console.error('Waiter call failed:', error);
-    ui.setWaiterLoading(elements.waiterButton, false);
+    renderWaiterButtons();
   }
+}
+
+function handleBackNavigation() {
+  const target = state.tableNumber ? `/client/?table=${state.tableNumber}` : '/client/';
+  window.location.href = target;
 }
 
 async function handleActionClicks(event) {

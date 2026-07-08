@@ -10,6 +10,7 @@ export const API = Object.freeze({
   REFRESH_INTERVAL: 3000,
   WAITER_COOLDOWN: 60000,
   WAITER_MAX_CALLS_PER_WINDOW: 2,
+  ORDER_NOTE_MAX_LENGTH: 120,
   RESTAURANT_ID: 1
 });
 
@@ -73,7 +74,8 @@ export const SELECTORS = Object.freeze({
   modalBody: '#modal-body',
   mainContent: '#main-content',
   backButton: '#btn-back',
-  waiterButton: '#waiter-btn'
+  waiterButton: '#waiter-btn',
+  waiterActionButtons: '[data-action="call-waiter"]'
 });
 
 // 6. Veprimet e Përdoruesit (User Actions)
@@ -84,5 +86,7 @@ export const ACTIONS = Object.freeze({
   SEND_ORDER: 'send-order',
   TOGGLE_HUB: 'toggle-hub',
   VIEW_ALL_STATUS: 'view-all-status',
-  RETRY_MENU: 'retry-menu'
+  RETRY_MENU: 'retry-menu',
+  CALL_WAITER: 'call-waiter',
+  TOGGLE_WAITER_MENU: 'toggle-waiter-menu'
 });

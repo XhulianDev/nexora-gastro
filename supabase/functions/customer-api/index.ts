@@ -8,11 +8,12 @@ type OrderItemInput = { id?: number | string; qty?: number | string };
 const DEFAULT_RESTAURANT_ID = 1;
 const WAITER_COOLDOWN_SECONDS = 60;
 const WAITER_MAX_CALLS_PER_WINDOW = 2;
-const NOTE_MAX_LENGTH = 300;
+const NOTE_MAX_LENGTH = 120;
 const MAX_TABLE_NUMBER = 500;
 const MAX_ITEM_QTY = 50;
 const MAX_ACTIVE_ORDERS_BEFORE_BUSY = 5;
 const ALLOWED_RATINGS = new Set(['bad', 'ok', 'good']);
+const ALLOWED_WAITER_CALL_TYPES = new Set(['help', 'payment']);
 
 function getCustomerToken(req: Request) {
   const token = (req.headers.get('x-customer-token') || '').trim();
@@ -29,6 +30,26 @@ function normalizeTableNumber(value: unknown) {
   const tableNumber = parsePositiveInt(value, 0);
   if (!tableNumber || tableNumber > MAX_TABLE_NUMBER) throw new Error('Invalid table number');
   return tableNumber;
+}
+
+function normalizeWaiterCallType(value: unknown) {
+  const type = String(value || 'help').trim().toLowerCase();
+  return ALLOWED_WAITER_CALL_TYPES.has(type) ? type : 'help';
+}
+
+function getWaiterCallType(body: JsonRecord) {
+  return normalizeWaiterCallType(
+    body.callType ?? body.call_type ?? body.waiterCallType ?? body.waiter_call_type ?? body.type ?? body.reason
+  );
+}
+
+function publicWaiterCall(call: Record<string, unknown>, customerToken: string) {
+  const { customer_token: ownerToken, ...safeCall } = call;
+  return { ...safeCall, can_cancel: ownerToken === customerToken };
+}
+
+function mapPublicWaiterCalls(calls: Record<string, unknown>[] = [], customerToken: string) {
+  return calls.map((call) => publicWaiterCall(call, customerToken));
 }
 
 function normalizeRequestedItems(rawItems: unknown) {
@@ -152,41 +173,64 @@ async function getOrders(supabase: ReturnType<typeof createServiceClient>, req: 
 }
 
 
-async function getActiveWaiterCall(supabase: ReturnType<typeof createServiceClient>, req: Request, body: JsonRecord) {
+async function getActiveWaiterCalls(supabase: ReturnType<typeof createServiceClient>, req: Request, body: JsonRecord) {
   const restaurantId = getRestaurantId(body);
   const customerToken = getCustomerToken(req);
   const tableNumber = normalizeTableNumber(body.tableNumber ?? body.table_number);
 
   const { data, error } = await supabase
     .from('waiter_calls')
-    .select('id, status, created_at, customer_token')
+    .select('id, status, created_at, updated_at, customer_token, call_type')
     .eq('restaurant_id', restaurantId)
     .eq('table_number', tableNumber)
-    .in('status', ['new', 'acknowledged'])
+    .eq('status', 'new')
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return json({ data: mapPublicWaiterCalls(data || [], customerToken) });
+}
+
+async function getActiveWaiterCall(supabase: ReturnType<typeof createServiceClient>, req: Request, body: JsonRecord) {
+  const restaurantId = getRestaurantId(body);
+  const customerToken = getCustomerToken(req);
+  const tableNumber = normalizeTableNumber(body.tableNumber ?? body.table_number);
+  const callType = body.callType || body.call_type || body.waiterCallType || body.waiter_call_type || body.type || body.reason ? getWaiterCallType(body) : null;
+
+  let query = supabase
+    .from('waiter_calls')
+    .select('id, status, created_at, updated_at, customer_token, call_type')
+    .eq('restaurant_id', restaurantId)
+    .eq('table_number', tableNumber)
+    .eq('status', 'new')
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
+    .limit(1);
+
+  if (callType) query = query.eq('call_type', callType);
+
+  const { data, error } = await query.maybeSingle();
 
   if (error) throw error;
   if (!data) return json({ data: null });
 
-  const { customer_token: ownerToken, ...call } = data;
-  return json({ data: { ...call, can_cancel: ownerToken === customerToken } });
+  return json({ data: publicWaiterCall(data, customerToken) });
 }
 
 async function callWaiter(supabase: ReturnType<typeof createServiceClient>, req: Request, body: JsonRecord) {
   const restaurantId = getRestaurantId(body);
   const customerToken = getCustomerToken(req);
   const tableNumber = normalizeTableNumber(body.tableNumber ?? body.table_number);
+  const callType = getWaiterCallType(body);
   const cooldownCutoff = new Date(Date.now() - WAITER_COOLDOWN_SECONDS * 1000).toISOString();
 
   const { data: activeCall, error: activeCallError } = await supabase
     .from('waiter_calls')
-    .select('id, status, created_at, customer_token')
+    .select('id, status, created_at, updated_at, customer_token, call_type')
     .eq('restaurant_id', restaurantId)
     .eq('table_number', tableNumber)
-    .in('status', ['new', 'acknowledged'])
+    .eq('call_type', callType)
+    .eq('status', 'new')
     .is('deleted_at', null)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -194,8 +238,7 @@ async function callWaiter(supabase: ReturnType<typeof createServiceClient>, req:
 
   if (activeCallError) throw activeCallError;
   if (activeCall) {
-    const { customer_token: ownerToken, ...call } = activeCall;
-    return json({ data: { ...call, can_cancel: ownerToken === customerToken }, meta: { alreadyActive: true, cooldownSeconds: WAITER_COOLDOWN_SECONDS } });
+    return json({ data: publicWaiterCall(activeCall, customerToken), meta: { alreadyActive: true, cooldownSeconds: WAITER_COOLDOWN_SECONDS } });
   }
 
   const { count, error: countError } = await supabase
@@ -203,11 +246,12 @@ async function callWaiter(supabase: ReturnType<typeof createServiceClient>, req:
     .select('id', { count: 'exact', head: true })
     .eq('restaurant_id', restaurantId)
     .eq('table_number', tableNumber)
+    .eq('call_type', callType)
     .gte('created_at', cooldownCutoff);
 
   if (countError) throw countError;
   if ((count || 0) >= WAITER_MAX_CALLS_PER_WINDOW) {
-    return errorResponse('Kjo tavolinë mund ta thërrasë kamarierin maksimum 2 herë brenda 60 sekondave.', 429);
+    return errorResponse('Kjo tavolinë mund ta dërgojë të njëjtën thirrje maksimum 2 herë brenda 60 sekondave.', 429);
   }
 
   const { data, error } = await supabase
@@ -217,8 +261,9 @@ async function callWaiter(supabase: ReturnType<typeof createServiceClient>, req:
       table_number: tableNumber,
       customer_token: customerToken,
       status: 'new',
+      call_type: callType,
     })
-    .select('id, status, created_at')
+    .select('id, status, created_at, updated_at, call_type')
     .single();
 
   if (error) throw error;
@@ -294,6 +339,8 @@ Deno.serve(async (req) => {
         return await createOrder(supabase, req, body);
       case 'getOrders':
         return await getOrders(supabase, req, body);
+      case 'getActiveWaiterCalls':
+        return await getActiveWaiterCalls(supabase, req, body);
       case 'getActiveWaiterCall':
         return await getActiveWaiterCall(supabase, req, body);
       case 'callWaiter':

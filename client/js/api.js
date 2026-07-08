@@ -54,14 +54,20 @@ export async function fetchActiveOrders(ids) {
   return result.data || [];
 }
 
-export async function insertWaiterCall(table) {
-  const result = await callCustomerApi('callWaiter', { tableNumber: table });
+export async function insertWaiterCall(table, callType = 'help') {
+  const type = String(callType || 'help') === 'payment' ? 'payment' : 'help';
+  const result = await callCustomerApi('callWaiter', { tableNumber: table, callType: type, call_type: type });
   return result;
 }
 
 export async function cancelWaiterCall(callId, table) {
   const result = await callCustomerApi('cancelWaiterCall', { id: callId, tableNumber: table });
   return result.data;
+}
+
+export async function fetchActiveWaiterCalls(table) {
+  const result = await callCustomerApi('getActiveWaiterCalls', { tableNumber: table });
+  return result.data || [];
 }
 
 export async function fetchActiveWaiterCall(table) {

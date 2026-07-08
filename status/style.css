@@ -317,3 +317,212 @@ button {
     gap: 0.5rem;
   }
 }
+/* Sprint 5.1 correction — waiter call menu on status page */
+.waiter-action-row {
+  position: fixed;
+  top: 1.25rem;
+  right: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+.waiter-action-row .waiter-btn {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  backdrop-filter: blur(0.625rem);
+  box-shadow: 0 0.25rem 0.9375rem rgba(0, 0, 0, 0.3);
+  transition: var(--transition-base);
+}
+
+.waiter-action-row .waiter-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.waiter-action-row .waiter-btn.is-active {
+  border-color: rgba(232, 184, 75, 0.45);
+  background: rgba(232, 184, 75, 0.16);
+  color: var(--color-yellow);
+}
+
+.waiter-action-menu {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 9.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: rgba(26, 25, 23, 0.96);
+  padding: 0.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+.waiter-action-menu[hidden] {
+  display: none !important;
+}
+
+.waiter-action-menu .waiter-btn {
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: none;
+}
+
+.waiter-action-menu .waiter-btn--payment {
+  color: var(--color-green);
+}
+
+@media (max-width: 36rem) {
+  .waiter-action-row {
+    top: auto;
+    right: 1rem;
+    bottom: 1rem;
+  }
+}
+
+/* Sprint 5.1.1 — stable status-page waiter menu layout */
+#waiter-action-row.waiter-action-row {
+  position: fixed;
+  top: 1.25rem;
+  right: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+
+#waiter-action-row .waiter-btn {
+  position: static !important;
+  top: auto !important;
+  right: auto !important;
+  z-index: auto !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 7rem;
+  white-space: nowrap;
+}
+
+#waiter-action-menu.waiter-action-menu {
+  position: static;
+  display: grid;
+  gap: 0.4rem;
+  min-width: 9.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: rgba(26, 25, 23, 0.96);
+  padding: 0.5rem;
+  box-shadow: var(--shadow-card);
+}
+
+#waiter-action-menu[hidden] {
+  display: none !important;
+}
+
+#waiter-action-menu .waiter-btn {
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: none;
+}
+
+@media (max-width: 36rem) {
+  #waiter-action-row.waiter-action-row {
+    top: auto;
+    right: 1rem;
+    bottom: 1rem;
+  }
+
+  #waiter-action-menu.waiter-action-menu {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+
+/* Sprint 5.1.2 — hard fix for status waiter call menu alignment */
+#waiter-action-row.waiter-action-row {
+  position: fixed !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  z-index: 1200 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-end !important;
+  gap: 0.5rem !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+#waiter-action-row[hidden] {
+  display: none !important;
+}
+
+#waiter-action-row .waiter-btn {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  z-index: auto !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-width: 7.5rem !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+}
+
+#waiter-menu-toggle.waiter-btn--main {
+  width: auto !important;
+  min-width: 7.5rem !important;
+}
+
+#waiter-action-menu.waiter-action-menu {
+  position: static !important;
+  inset: auto !important;
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0.45rem !important;
+  width: max-content !important;
+  min-width: 9rem !important;
+  max-width: calc(100vw - 2rem) !important;
+  margin: 0 !important;
+  padding: 0.5rem !important;
+}
+
+#waiter-action-menu[hidden] {
+  display: none !important;
+}
+
+#waiter-action-menu .waiter-btn {
+  justify-content: flex-start !important;
+}
+
+@media (max-width: 36rem) {
+  #waiter-action-row.waiter-action-row {
+    top: auto !important;
+    right: 1rem !important;
+    bottom: 1rem !important;
+  }
+
+  #waiter-action-menu.waiter-action-menu {
+    grid-template-columns: 1fr 1fr !important;
+    width: min(20rem, calc(100vw - 2rem)) !important;
+  }
+}

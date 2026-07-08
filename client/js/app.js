@@ -4,10 +4,12 @@ import {
   setActiveOrderIdsToStorage,
   getActiveWaiterCallForTable,
   setActiveWaiterCallForTable,
+  setActiveWaiterCallsForTable,
+  normalizeWaiterCallType,
   getStatusUrl
 } from './utils.js';
 import { state, findMenuItemById } from './state.js';
-import { fetchActiveMenu, submitOrder, fetchActiveOrders, insertWaiterCall, cancelWaiterCall, fetchActiveWaiterCall } from './api.js';
+import { fetchActiveMenu, submitOrder, fetchActiveOrders, insertWaiterCall, cancelWaiterCall, fetchActiveWaiterCalls } from './api.js';
 import * as ui from './ui.js';
 
 document.addEventListener('DOMContentLoaded', bootstrap);
@@ -60,12 +62,28 @@ function handleGlobalClicks(event) {
 
   if (target.closest(SELECTORS.cartOpenButton)) {
     ui.openModal();
+    renderWaiterButtons();
     return;
   }
 
   const sendOrderBtn = target.closest(`[data-action="${ACTIONS.SEND_ORDER}"]`);
   if (sendOrderBtn) {
     sendOrder();
+    return;
+  }
+
+  const toggleWaiterMenuBtn = target.closest(`[data-action="${ACTIONS.TOGGLE_WAITER_MENU}"]`);
+  if (toggleWaiterMenuBtn) {
+    event.stopPropagation();
+    toggleWaiterMenu();
+    return;
+  }
+
+  const callWaiterBtn = target.closest(`[data-action="${ACTIONS.CALL_WAITER}"]`);
+  if (callWaiterBtn) {
+    event.preventDefault();
+    event.stopPropagation();
+    callWaiter(callWaiterBtn.dataset.callType || callWaiterBtn.dataset.call_type || 'help');
     return;
   }
 
@@ -91,6 +109,11 @@ function handleGlobalClicks(event) {
   const hubDrop = document.querySelector('#hub-drop');
   if (hubDrop?.classList.contains('is-open') && !target.closest('.status-hub')) {
     hubDrop.classList.remove('is-open');
+  }
+
+  const waiterMenu = document.querySelector('#waiter-action-menu');
+  if (waiterMenu && !waiterMenu.hidden && !target.closest('.waiter-action-row')) {
+    closeWaiterMenu();
   }
 }
 
@@ -125,7 +148,10 @@ function changeQty(itemId, delta) {
   if (!isModalOpen) return;
 
   if (Object.keys(state.cart).length === 0) ui.closeModal();
-  else ui.renderModalContent();
+  else {
+    ui.renderModalContent();
+    renderWaiterButtons();
+  }
 }
 
 async function sendOrder() {
@@ -149,7 +175,7 @@ async function sendOrder() {
   sendBtn.textContent = 'Duke dërguar...';
 
   try {
-    const note = noteField?.value?.trim() || '';
+    const note = (noteField?.value?.trim() || '').slice(0, API.ORDER_NOTE_MAX_LENGTH);
     const data = await submitOrder(state.tableNumber, items, note);
     const activeIds = getActiveOrderIdsFromStorage();
     const nextIds = Array.from(new Set([...activeIds, data.id]));
@@ -179,101 +205,135 @@ async function syncStatus() {
       ui.renderStatusHub([]);
     }
 
-    const activeCall = await fetchActiveWaiterCall(state.tableNumber);
-    setActiveWaiterCallForTable(state.tableNumber, activeCall);
-    renderWaiterButton();
+    const activeCalls = await fetchActiveWaiterCalls(state.tableNumber);
+    setActiveWaiterCallsForTable(state.tableNumber, activeCalls);
+    renderWaiterButtons();
   } catch (error) {
     console.error('Gabim në sinkronizim:', error);
   }
 }
 
-function renderWaiterButton() {
-  const btn = document.querySelector(SELECTORS.waiterButton);
-  if (!btn) return;
-
-  const activeCall = getActiveWaiterCallForTable(state.tableNumber);
-  if (activeCall?.id) {
-    btn.classList.add('is-active');
-    if (activeCall.status === 'acknowledged') {
-      btn.innerHTML = 'Kamarieri u njoftua';
-      btn.disabled = true;
-      return;
-    }
-    if (activeCall.can_cancel === false) {
-      btn.innerHTML = 'Kamarieri u thirr';
-      btn.disabled = true;
-      return;
-    }
-    btn.innerHTML = 'Anulo thirrjen';
-    btn.disabled = false;
-    return;
-  }
-
-  btn.classList.remove('is-active');
-  btn.innerHTML = 'Kamarieri';
-  btn.disabled = false;
+function closeWaiterMenu() {
+  const menu = document.querySelector('#waiter-action-menu');
+  const toggle = document.querySelector('#waiter-menu-toggle');
+  if (!menu || !toggle) return;
+  menu.hidden = true;
+  toggle.setAttribute('aria-expanded', 'false');
 }
 
-async function callWaiter() {
-  const btn = document.querySelector(SELECTORS.waiterButton);
-  if (!btn || btn.disabled) return;
+function toggleWaiterMenu() {
+  const menu = document.querySelector('#waiter-action-menu');
+  const toggle = document.querySelector('#waiter-menu-toggle');
+  if (!menu || !toggle) return;
 
-  const activeCall = getActiveWaiterCallForTable(state.tableNumber);
+  const nextOpen = menu.hidden;
+  menu.hidden = !nextOpen;
+  toggle.setAttribute('aria-expanded', String(nextOpen));
+  if (nextOpen) renderWaiterButtons();
+}
+
+function getCallTypeLabel(callType) {
+  return normalizeWaiterCallType(callType) === 'payment' ? 'Pagesë' : 'Ndihmë';
+}
+
+function getCallTypeCancelLabel(callType) {
+  return normalizeWaiterCallType(callType) === 'payment' ? 'Anulo pagesën' : 'Anulo ndihmën';
+}
+
+function isActionableCall(call) {
+  return Boolean(call?.id && call.status === 'new');
+}
+
+function renderWaiterButtons() {
+  const buttons = document.querySelectorAll(SELECTORS.waiterActionButtons);
+  if (!buttons.length) return;
+
+  buttons.forEach((btn) => {
+    const type = normalizeWaiterCallType(btn.dataset.callType);
+    const storedCall = getActiveWaiterCallForTable(state.tableNumber, type);
+    const activeCall = isActionableCall(storedCall) ? storedCall : null;
+
+    btn.classList.toggle('is-active', Boolean(activeCall?.id));
+
+    if (activeCall?.id) {
+      if (activeCall.can_cancel === false) {
+        btn.textContent = `${getCallTypeLabel(type)} u dërgua`;
+        btn.disabled = true;
+        return;
+      }
+
+      btn.textContent = getCallTypeCancelLabel(type);
+      btn.disabled = false;
+      return;
+    }
+
+    btn.textContent = getCallTypeLabel(type);
+    btn.disabled = false;
+  });
+}
+
+async function callWaiter(callType = 'help') {
+  const type = normalizeWaiterCallType(callType);
+  const buttons = [...document.querySelectorAll(`${SELECTORS.waiterActionButtons}[data-call-type="${type}"]`)];
+  if (buttons.some((btn) => btn.disabled)) return;
+
+  const storedCall = getActiveWaiterCallForTable(state.tableNumber, type);
+  const activeCall = isActionableCall(storedCall) ? storedCall : null;
+
+  buttons.forEach((btn) => {
+    btn.disabled = true;
+    btn.textContent = activeCall?.id ? 'Duke anuluar...' : 'Duke dërguar...';
+  });
 
   if (activeCall?.id) {
-    btn.disabled = true;
-    btn.innerHTML = 'Duke anuluar...';
-
     try {
       await cancelWaiterCall(activeCall.id, state.tableNumber);
-      setActiveWaiterCallForTable(state.tableNumber, null);
+      setActiveWaiterCallForTable(state.tableNumber, null, type);
       ui.showToast('Thirrja u anulua.', 'success');
     } catch (error) {
       console.error('Gabim në anulim:', error);
-      setActiveWaiterCallForTable(state.tableNumber, null);
+      setActiveWaiterCallForTable(state.tableNumber, null, type);
       ui.showToast(error.message || 'Thirrja nuk mund të anulohet më.', 'error');
     } finally {
-      renderWaiterButton();
+      renderWaiterButtons();
     }
     return;
   }
 
-  btn.innerHTML = 'Duke thirrur...';
-  btn.disabled = true;
-
   try {
-    const result = await insertWaiterCall(state.tableNumber);
+    const result = await insertWaiterCall(state.tableNumber, type);
     const call = result.data;
     if (call?.id) {
-      setActiveWaiterCallForTable(state.tableNumber, call);
-      ui.showToast('Kamarieri u thirr me sukses. Mund ta anuloni derisa thirrja është aktive.', 'success');
+      setActiveWaiterCallForTable(state.tableNumber, call, type);
+      const message = type === 'payment'
+        ? 'Kërkesa për pagesë u dërgua.'
+        : 'Kamarieri u thirr për ndihmë.';
+      ui.showToast(message, 'success');
     }
-    renderWaiterButton();
+    renderWaiterButtons();
   } catch (error) {
     console.error('Gabim kamarieri:', error);
     ui.showToast(error.message || `Mund ta thërrisni kamarierin maksimum ${API.WAITER_MAX_CALLS_PER_WINDOW} herë brenda 60 sekondave.`, 'error');
-    renderWaiterButton();
+    renderWaiterButtons();
   }
 }
 
 function injectWaiterButton() {
-  if (document.querySelector(SELECTORS.waiterButton)) return;
+  if (document.querySelector('.waiter-action-row')) return;
 
-  const btn = document.createElement('button');
-  btn.id = SELECTORS.waiterButton.substring(1);
-  btn.className = 'waiter-btn';
-  btn.innerHTML = 'Kamarieri';
-  btn.onclick = callWaiter;
+  const row = document.createElement('div');
+  row.className = 'waiter-action-row';
+  row.innerHTML = `
+    <button id="waiter-menu-toggle" class="waiter-btn waiter-btn--main" data-action="toggle-waiter-menu" type="button" aria-expanded="false" aria-controls="waiter-action-menu">Kamarier</button>
+    <div id="waiter-action-menu" class="waiter-action-menu" hidden>
+      <button class="waiter-btn waiter-btn--option" data-action="call-waiter" data-call-type="help" type="button">Ndihmë</button>
+      <button class="waiter-btn waiter-btn--option waiter-btn--payment" data-action="call-waiter" data-call-type="payment" type="button">Pagesë</button>
+    </div>
+  `;
 
-  let row = document.querySelector('.waiter-action-row');
-  if (!row) {
-    row = document.createElement('div');
-    row.className = 'waiter-action-row';
-    const header = document.querySelector('.page-header');
-    if (header) header.insertAdjacentElement('afterend', row);
-    else document.body.prepend(row);
-  }
+  const header = document.querySelector('.page-header');
+  if (header) header.insertAdjacentElement('afterend', row);
+  else document.body.prepend(row);
 
-  row.appendChild(btn);
-  renderWaiterButton();
+  renderWaiterButtons();
 }

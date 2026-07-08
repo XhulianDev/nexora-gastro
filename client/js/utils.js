@@ -51,8 +51,7 @@ export function getOrCreateCustomerToken() {
 }
 
 export function getStatusUrl(query = '') {
-  const basePath = window.location.pathname.includes('/client/') ? '../status/' : 'status/';
-  return `${basePath}${query}`;
+  return `/status/${query}`;
 }
 
 export function getActiveWaiterCallsFromStorage() {
@@ -65,14 +64,55 @@ export function getActiveWaiterCallsFromStorage() {
   }
 }
 
-export function getActiveWaiterCallForTable(tableNumber) {
-  const calls = getActiveWaiterCallsFromStorage();
-  return calls[String(tableNumber)] || null;
+export function normalizeWaiterCallType(value) {
+  return String(value || 'help') === 'payment' ? 'payment' : 'help';
 }
 
-export function setActiveWaiterCallForTable(tableNumber, call) {
+export function getActiveWaiterCallsForTable(tableNumber) {
   const calls = getActiveWaiterCallsFromStorage();
-  if (call?.id) calls[String(tableNumber)] = call;
+  const tableCalls = calls[String(tableNumber)];
+
+  if (!tableCalls) return {};
+
+  // Backward compatibility with older storage format: table -> single call.
+  if (tableCalls.id) {
+    const type = normalizeWaiterCallType(tableCalls.call_type);
+    return { [type]: tableCalls };
+  }
+
+  return tableCalls && typeof tableCalls === 'object' && !Array.isArray(tableCalls) ? tableCalls : {};
+}
+
+export function getActiveWaiterCallForTable(tableNumber, callType = 'help') {
+  const tableCalls = getActiveWaiterCallsForTable(tableNumber);
+  return tableCalls[normalizeWaiterCallType(callType)] || null;
+}
+
+export function setActiveWaiterCallsForTable(tableNumber, callsForTable) {
+  const calls = getActiveWaiterCallsFromStorage();
+  const nextCalls = {};
+
+  const source = Array.isArray(callsForTable)
+    ? callsForTable
+    : Object.values(callsForTable || {});
+
+  for (const call of source) {
+    if (!call?.id || call.status !== 'new') continue;
+    nextCalls[normalizeWaiterCallType(call.call_type)] = call;
+  }
+
+  if (Object.keys(nextCalls).length) calls[String(tableNumber)] = nextCalls;
   else delete calls[String(tableNumber)];
+
   localStorage.setItem(STORAGE.ACTIVE_WAITER_CALLS, JSON.stringify(calls));
+}
+
+export function setActiveWaiterCallForTable(tableNumber, call, callType = 'help') {
+  const tableCalls = getActiveWaiterCallsForTable(tableNumber);
+  const type = normalizeWaiterCallType(call?.call_type || callType);
+
+  if (call?.id && call.status === 'new') tableCalls[type] = { ...call, call_type: type };
+  else delete tableCalls[type];
+
+  setActiveWaiterCallsForTable(tableNumber, tableCalls);
 }

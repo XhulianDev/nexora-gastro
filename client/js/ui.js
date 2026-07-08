@@ -1,4 +1,4 @@
-import { CATEGORY_LABELS, ORDER_STATUS } from './constants.js';
+import { API, CATEGORY_LABELS, ORDER_STATUS } from './constants.js';
 import { escapeHtml, formatMoney } from './utils.js';
 import { state, elements, findMenuItemById, getUpsellSuggestion } from './state.js';
 
@@ -55,6 +55,22 @@ function renderCategoryButton(category, label, isActive) {
       ${escapeHtml(label)}
     </button>`;
 }
+
+function getNotePlaceholder(items = []) {
+  const categories = new Set(items.map((item) => item.category).filter(Boolean));
+
+  if (categories.size === 1) {
+    const [category] = [...categories];
+    if (category === 'desert') return 'Opsionale: pa arra, me çokollatë shtesë...';
+    if (category === 'pije') return 'Opsionale: pa akull, me limon...';
+    if (category === 'supat') return 'Opsionale: më pak kripë, pa majdanoz...';
+    if (category === 'sallata') return 'Opsionale: pa domate, salcë veçmas...';
+    return 'Opsionale: pa qepë, ekstra djathë...';
+  }
+
+  return 'Opsionale: shënim i shkurtër për porosinë...';
+}
+
 
 export function renderMenuLoading() {
   if (!elements.categoryBar || !elements.menuList) return;
@@ -254,7 +270,20 @@ export function renderModalContent() {
         </div>
       </div>` : ''}
 
-    <textarea id="note" class="note-field" placeholder="Shënim për porosinë, p.sh. pa qepë, ekstra salcë..."></textarea>
+    <div class="modal-help">
+      <div>
+        <strong>Ndihmë për porosinë?</strong>
+        <span>Thirrni kamarierin pa mbyllur shportën.</span>
+      </div>
+      <div class="modal-help__actions">
+        <button class="button button--ghost modal-help__btn" data-action="call-waiter" data-call-type="help" type="button">Ndihmë</button>
+      </div>
+    </div>
+
+    <div class="note-field-wrap">
+      <textarea id="note" class="note-field" maxlength="${API.ORDER_NOTE_MAX_LENGTH}" placeholder="${escapeHtml(getNotePlaceholder(cartItems))}"></textarea>
+      <div class="note-limit">Maks. ${API.ORDER_NOTE_MAX_LENGTH} karaktere</div>
+    </div>
     <button id="send-btn" class="button button--primary confirm-btn" data-action="send-order">
       Dërgo porosinë (${formatMoney(total)})
     </button>
@@ -287,7 +316,7 @@ export function renderStatusHub(orders, keepOpen = false) {
               <span class="status-hub__item-title">Porosia #${String(order.id).slice(-4)}</span>
               <div class="status-hub__item-actions">
                 <small class="status-hub__status ${order.status === 'done' ? 'is-done' : ''}">${escapeHtml(statusInfo.label)}</small>
-                <a class="status-hub__link" href="status/?id=${order.id}">Hap</a>
+                <a class="status-hub__link" href="/status/?id=${order.id}">Hap</a>
               </div>
             </div>`;
         }).join('')}
