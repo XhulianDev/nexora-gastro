@@ -346,6 +346,26 @@ function groupOrdersByTable(orders) {
     });
 }
 
+
+function getOrderGridColumnCount(container, minColumnWidth = 288, gap = 15) {
+  const width = Number(container?.clientWidth || 0);
+  if (!width) return 1;
+  return Math.max(1, Math.floor((width + gap) / (minColumnWidth + gap)));
+}
+
+function renderOrderColumns(container, cardHtmlList = []) {
+  const columnCount = getOrderGridColumnCount(container);
+  const columns = Array.from({ length: columnCount }, () => []);
+  cardHtmlList.forEach((cardHtml, index) => {
+    columns[index % columnCount].push(cardHtml);
+  });
+
+  container.style.setProperty('--order-grid-columns', String(columnCount));
+  container.innerHTML = columns
+    .map((cards) => `<div class="orders-grid-column">${cards.join('')}</div>`)
+    .join('');
+}
+
 function getOrderStatusLabel(status) {
   if (status === 'new') return 'E re';
   if (status === 'preparing') return 'Në përgatitje';
@@ -359,12 +379,14 @@ function getStatusButton(order) {
   return '';
 }
 
+
 function renderOrders() {
   const orders = filterByZone(state.orders);
   $('orders-count').textContent = orders.length;
   if (!orders.length) { $('orders-container').innerHTML = '<div class="empty">Nuk ka porosi aktive në këtë zonë.</div>'; return; }
 
-  $('orders-container').innerHTML = groupOrdersByTable(orders).map((group) => {
+  const groups = groupOrdersByTable(orders);
+  const cards = groups.map((group) => {
     const countLabel = group.orders.length === 1 ? '1 porosi aktive' : `${group.orders.length} porosi aktive`;
     return `
       <article class="order-card table-order-card status-${escapeHTML(group.status)}">
@@ -402,7 +424,8 @@ function renderOrders() {
         </div>
       </article>
     `;
-  }).join('');
+  });
+  renderOrderColumns($('orders-container'), cards);
 }
 
 function render() { renderZoneFilter(); renderSummary(); renderCalls(); renderOrders(); updateBulkActions(); }

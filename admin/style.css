@@ -537,11 +537,23 @@ body {
    9. ORDERS
 ───────────────────────────────────────── */
 .orders-grid {
+  --order-card-gap: 0.9375rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+  grid-template-columns: repeat(var(--order-grid-columns, 1), minmax(0, 1fr));
+  gap: var(--order-card-gap);
   align-items: start;
-  gap: var(--space-4);
   min-width: 0;
+}
+
+.orders-grid-column {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: var(--order-card-gap);
+}
+
+.orders-grid > .empty-state--full {
+  grid-column: 1 / -1;
 }
 
 .order-card {
@@ -1387,7 +1399,10 @@ body {
     gap: var(--space-3);
   }
 
-  .orders-grid,
+  .orders-grid {
+    grid-template-columns: 1fr;
+  }
+
   .waiter-calls-grid {
     grid-template-columns: 1fr;
   }

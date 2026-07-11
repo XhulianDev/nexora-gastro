@@ -120,6 +120,26 @@ function groupOrdersByTable(orders = []) {
     });
 }
 
+
+function getOrderGridColumnCount(container, minColumnWidth = 280, gap = 15) {
+  const width = Number(container?.clientWidth || 0);
+  if (!width) return 1;
+  return Math.max(1, Math.floor((width + gap) / (minColumnWidth + gap)));
+}
+
+function renderOrderColumns(container, cardHtmlList = []) {
+  const columnCount = getOrderGridColumnCount(container);
+  const columns = Array.from({ length: columnCount }, () => []);
+  cardHtmlList.forEach((cardHtml, index) => {
+    columns[index % columnCount].push(cardHtml);
+  });
+
+  container.style.setProperty('--order-grid-columns', String(columnCount));
+  container.innerHTML = columns
+    .map((cards) => `<div class="orders-grid-column">${cards.join('')}</div>`)
+    .join('');
+}
+
 function orderTimeMeta(order) {
   if (order?.status === 'preparing') return formatElapsedSince(order.updated_at || order.created_at, 'Pranuar');
   if (order?.status === 'done') return formatElapsedSince(order.updated_at || order.created_at, 'Gati');
@@ -228,7 +248,8 @@ export const ui = {
       return;
     }
 
-    container.innerHTML = groupOrdersByTable(filteredOrders).map((group) => {
+    const groups = groupOrdersByTable(filteredOrders);
+    const cards = groups.map((group) => {
       const countLabel = group.orders.length === 1 ? '1 porosi aktive' : `${group.orders.length} porosi aktive`;
       return `
         <article class="order-card table-order-card ${STATUS_CLASSES[group.status] || ''}">
@@ -277,7 +298,9 @@ export const ui = {
           </div>
         </article>
       `;
-    }).join('');
+    });
+
+    renderOrderColumns(container, cards);
   },
 
   _getOrderActionsHTML: (order) => {
