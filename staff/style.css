@@ -665,3 +665,550 @@ body.is-login-mode .login-card p {
     flex-direction: column;
   }
 }
+
+
+
+/* Sprint 5.2.12 — stable mobile staff layout
+   Model: compact controls with equal columns, not oversized stacked buttons. */
+@media (max-width: 48rem) {
+  .staff-shell {
+    width: min(100% - 1rem, 80rem);
+    padding-top: 0.9rem;
+  }
+
+  body.is-staff-mode .staff-header,
+  .staff-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  body.is-staff-mode .staff-header .sub {
+    display: none;
+  }
+
+  .staff-header h1 {
+    font-size: clamp(1.45rem, 7vw, 1.95rem);
+    line-height: 1.05;
+  }
+
+  .live-pill {
+    align-self: start;
+    min-height: 1.9rem;
+    padding: 0.38rem 0.65rem;
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .zone-filter {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .staff-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .zone-chip,
+  .staff-actions .ghost-btn,
+  body.is-staff-mode .staff-actions .ghost-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-width: 0;
+    min-height: 2.2rem;
+    padding: 0.46rem 0.5rem;
+    border-radius: 0.875rem;
+    font-size: clamp(0.62rem, 2.05vw, 0.72rem);
+    font-weight: 800;
+    line-height: 1.08;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .zone-chip {
+    gap: 0.35rem;
+  }
+
+  .zone-chip strong {
+    min-width: 1.2rem;
+    padding: 0.1rem 0.32rem;
+    font-size: 0.66rem;
+  }
+
+  .summary-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .summary-card {
+    padding: 0.75rem;
+  }
+
+  .summary-card strong {
+    font-size: 1.25rem;
+  }
+
+  .panel {
+    padding: 0.875rem;
+  }
+
+  .panel-header {
+    gap: 0.65rem;
+  }
+
+  .orders-grid,
+  .calls-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .order-card header,
+  .call-card-header,
+  .items,
+  .call-card-body,
+  .table-order-list {
+    padding: 0.8rem;
+  }
+
+  .order-card footer,
+  .table-order-footer {
+    gap: 0.55rem;
+    padding: 0.75rem 0.8rem !important;
+  }
+
+  .order-card footer div,
+  .table-order-footer div {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.45rem;
+  }
+
+  .order-card button,
+  .call-action-ack,
+  .call-action-close,
+  .small-danger {
+    min-height: 1.9rem;
+    padding: 0.42rem 0.62rem !important;
+    border-radius: 999px;
+    font-size: 0.72rem !important;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
+  .call-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .call-action-ack,
+  .call-action-close {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 25rem) {
+  .staff-shell {
+    width: min(100% - 0.75rem, 80rem);
+  }
+
+  .zone-filter {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .staff-actions {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  .zone-chip,
+  .staff-actions .ghost-btn,
+  body.is-staff-mode .staff-actions .ghost-btn {
+    min-height: 2.1rem;
+    padding: 0.42rem 0.42rem;
+    font-size: 0.64rem;
+  }
+
+  .order-card button,
+  .call-action-ack,
+  .call-action-close,
+  .small-danger {
+    padding-inline: 0.52rem !important;
+    font-size: 0.66rem !important;
+  }
+
+  .live-pill {
+    padding: 0.34rem 0.58rem;
+    font-size: 0.68rem;
+  }
+
+  .summary-card strong {
+    font-size: 1.15rem;
+  }
+}
+
+/* =============================================================
+   Sprint 5.2.13 — Clean mobile staff layout reset
+   Model: compact header + horizontal zone/action chips + 2-col stats + 1-col work cards.
+   ============================================================= */
+@media (max-width: 48rem) {
+  .staff-shell {
+    width: min(100% - 1rem, 80rem);
+    padding: 0.95rem 0 1.6rem;
+  }
+
+  body.is-staff-mode .staff-header,
+  .staff-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .staff-header h1 {
+    margin-top: 0.15rem;
+    font-size: clamp(1.45rem, 7vw, 1.95rem);
+    line-height: 1.05;
+  }
+
+  body.is-staff-mode .staff-header .sub {
+    display: none;
+  }
+
+  .sub {
+    font-size: 0.82rem;
+    line-height: 1.35;
+  }
+
+  .live-pill {
+    align-self: start;
+    min-height: 1.9rem;
+    padding: 0.38rem 0.65rem;
+    font-size: 0.72rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .toolbar {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-bottom: 0.9375rem;
+  }
+
+  .zone-filter,
+  .staff-actions {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.5rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 0.1rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .zone-filter::-webkit-scrollbar,
+  .staff-actions::-webkit-scrollbar {
+    display: none;
+  }
+
+  .zone-chip,
+  .staff-actions .ghost-btn,
+  body.is-staff-mode .staff-actions .ghost-btn {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: max-content;
+    min-height: 2.2rem;
+    gap: 0.42rem;
+    padding: 0.45rem 0.78rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .zone-chip strong {
+    min-width: 1.2rem;
+    padding: 0.1rem 0.34rem;
+    font-size: 0.66rem;
+    line-height: 1.1;
+  }
+
+  .summary-bar {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9375rem;
+  }
+
+  .summary-card {
+    padding: 0.8rem;
+    border-radius: 0.875rem;
+  }
+
+  .summary-card span {
+    font-size: 0.68rem;
+  }
+
+  .summary-card strong {
+    font-size: 1.25rem;
+  }
+
+  .panel {
+    margin-top: 0.9375rem;
+    padding: 0.875rem;
+    border-radius: 0.875rem;
+  }
+
+  .panel-header {
+    gap: 0.65rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .orders-grid,
+  .calls-grid {
+    --order-grid-columns: 1 !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.9375rem;
+  }
+
+  .orders-grid-column {
+    gap: 0.9375rem;
+  }
+
+  .order-card,
+  .call-card,
+  .table-order-card {
+    border-radius: 0.875rem;
+  }
+
+  .order-card header,
+  .call-card-header,
+  .items,
+  .call-card-body,
+  .table-order-list {
+    padding: 0.85rem;
+  }
+
+  .table-order-note {
+    margin-inline: 0.85rem;
+  }
+
+  .order-card footer,
+  .table-order-footer {
+    align-items: flex-start;
+    gap: 0.65rem;
+    padding: 0.8rem 0.85rem !important;
+  }
+
+  .order-card footer div,
+  .table-order-footer div {
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 0.5rem;
+  }
+
+  .order-card button,
+  .call-action-ack,
+  .call-action-close,
+  .small-danger {
+    flex: 0 0 auto;
+    width: auto;
+    min-height: 2rem;
+    padding: 0.42rem 0.66rem !important;
+    border-radius: 999px;
+    font-size: 0.72rem !important;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .call-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+  }
+
+  .call-action-ack,
+  .call-action-close {
+    margin-left: 0;
+  }
+
+  .toast {
+    right: 0.875rem;
+    bottom: 0.875rem;
+    left: 0.875rem;
+    width: auto;
+  }
+}
+
+@media (max-width: 25rem) {
+  .staff-shell {
+    width: min(100% - 0.75rem, 80rem);
+  }
+
+  .summary-bar {
+    gap: 0.75rem;
+  }
+
+  .zone-chip,
+  .staff-actions .ghost-btn,
+  body.is-staff-mode .staff-actions .ghost-btn,
+  .order-card button,
+  .call-action-ack,
+  .call-action-close,
+  .small-danger {
+    font-size: 0.68rem !important;
+  }
+}
+
+
+/* Sprint 5.2.14 — focused mobile alignment + normal yellow/green action buttons */
+@media (max-width: 48rem) {
+  .table-order-item-head {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    text-align: center;
+  }
+
+  .table-order-item-head > div {
+    min-width: 0;
+    text-align: center;
+  }
+
+  .table-order-item-head .order-status-pill {
+    align-self: center;
+  }
+
+  .order-card button.btn-next-preparing,
+  .order-card button.btn-next-done {
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
+    min-height: 0;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 0.55rem;
+    font-size: 0.82rem !important;
+    font-weight: 700;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+}
+
+
+/* Sprint 5.2.15 — mobile process buttons */
+@media (max-width: 48rem) {
+  .order-card footer div,
+  .table-order-footer div {
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100%;
+    gap: 0.5rem;
+  }
+
+  .order-card button.btn-next-preparing,
+  .order-card button.btn-next-done,
+  .table-order-footer button.btn-next-preparing,
+  .table-order-footer button.btn-next-done,
+  .table-order-footer button.outline,
+  .table-order-footer button.danger {
+    display: inline-flex !important;
+    flex: 0 0 auto !important;
+    align-items: center;
+    justify-content: center;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100%;
+    min-height: 2.25rem !important;
+    padding: 0.55rem 0.9rem !important;
+    border-radius: 0.625rem !important;
+    font-size: 0.78rem !important;
+    font-weight: 800;
+    line-height: 1 !important;
+    text-align: center;
+    white-space: nowrap;
+  }
+}
+
+/* Sprint 5.2.16 — tighter mobile action spacing */
+@media (max-width: 48rem) {
+  .order-card footer,
+  .table-order-footer {
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: wrap;
+    gap: 0.45rem !important;
+    padding: 0.55rem 0.85rem !important;
+  }
+
+  .order-card footer > strong,
+  .table-order-footer > strong {
+    flex: 0 0 auto;
+    margin: 0;
+    line-height: 1.1;
+  }
+
+  .order-card footer div,
+  .table-order-footer div {
+    width: auto !important;
+    flex: 0 0 auto !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    gap: 0.4rem !important;
+    margin: 0 !important;
+  }
+
+  .order-card button.btn-next-preparing,
+  .order-card button.btn-next-done,
+  .table-order-footer button.btn-next-preparing,
+  .table-order-footer button.btn-next-done,
+  .table-order-footer button.outline,
+  .table-order-footer button.danger {
+    min-height: 2rem !important;
+    padding: 0.45rem 0.72rem !important;
+    border-radius: 0.55rem !important;
+    font-size: 0.74rem !important;
+    line-height: 1 !important;
+  }
+}
+
+@media (max-width: 22rem) {
+  .order-card footer,
+  .table-order-footer {
+    align-items: flex-start !important;
+  }
+
+  .order-card footer div,
+  .table-order-footer div {
+    flex: 1 1 100% !important;
+    justify-content: flex-start !important;
+  }
+}

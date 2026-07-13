@@ -199,9 +199,39 @@ function notifySidebarChanges(before, after) {
   if (before.devices !== after.devices && active !== 'staff-settings') flashNav('staff-settings');
 }
 
+function setupMobileNavigation() {
+  const sidebar = document.querySelector('.sidebar');
+  const toggle = document.getElementById('mobile-nav-toggle');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  if (!sidebar || !toggle || toggle.dataset.bound === 'true') return;
+  toggle.dataset.bound = 'true';
+
+  const closeMenu = () => {
+    sidebar.classList.remove('mobile-open');
+    toggle.setAttribute('aria-expanded', 'false');
+  };
+
+  toggle.addEventListener('click', () => {
+    const isOpen = sidebar.classList.toggle('mobile-open');
+    toggle.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  navItems.forEach((item) => item.addEventListener('click', closeMenu));
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeMenu();
+  });
+
+  window.addEventListener('resize', () => {
+    if (window.matchMedia('(min-width: 48.01rem)').matches) closeMenu();
+  });
+}
+
 function setupNavigation() {
   const navItems = document.querySelectorAll('.nav-item[data-page]');
   const pages = document.querySelectorAll('.page');
+  setupMobileNavigation();
 
   const showPage = (targetPage = 'orders', updateHash = true) => {
     const target = document.querySelector(`.nav-item[data-page="${targetPage}"]`) ? targetPage : 'orders';

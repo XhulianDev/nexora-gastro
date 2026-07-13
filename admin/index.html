@@ -17,7 +17,7 @@
     href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="/admin/style.css?v=ng-5-1-2" />
+  <link rel="stylesheet" href="/admin/style.css?v=ng-5-2-16" />
 </head>
 <body>
 
@@ -47,7 +47,13 @@
         <p>Powered by Nexora</p>
       </div>
 
-      <nav class="nav" aria-label="Navigimi kryesor">
+      <button class="mobile-nav-toggle" id="mobile-nav-toggle" type="button" aria-label="Hap menynë" aria-expanded="false" aria-controls="admin-nav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="nav" id="admin-nav" aria-label="Navigimi kryesor">
         <button
           class="nav-item active"
           id="nav-orders"
@@ -413,6 +419,6 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-  <script type="module" src="/admin/js/app.js?v=ng-5-1-2"></script>
+  <script type="module" src="/admin/js/app.js?v=ng-5-2-10"></script>
 </body>
 </html>
