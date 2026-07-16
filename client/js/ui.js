@@ -1,4 +1,4 @@
-import { API, CATEGORY_LABELS, ORDER_STATUS } from './constants.js';
+import { API, CATEGORY_DESCRIPTIONS, CATEGORY_LABELS, CATEGORY_ORDER, ORDER_STATUS } from './constants.js';
 import { escapeHtml, formatMoney } from './utils.js';
 import { state, elements, findMenuItemById, getUpsellSuggestion } from './state.js';
 
@@ -25,13 +25,22 @@ export function navigateToCategory(category) {
   }, 100);
 }
 
+function sortCategories(categories = []) {
+  const order = new Map(CATEGORY_ORDER.map((category, index) => [category, index]));
+  return [...categories].sort((a, b) => {
+    const aIndex = order.has(a) ? order.get(a) : Number.MAX_SAFE_INTEGER;
+    const bIndex = order.has(b) ? order.get(b) : Number.MAX_SAFE_INTEGER;
+    return aIndex - bIndex || String(a).localeCompare(String(b), 'sq');
+  });
+}
+
 /**
  * Renderon butonat e kategorive në shiritin horizontal.
  */
 export function renderCategories() {
   if (!elements.categoryBar) return;
 
-  const categoryList = [...new Set(state.menu.map(item => item.category).filter(Boolean))];
+  const categoryList = sortCategories(new Set(state.menu.map(item => item.category).filter(Boolean)));
 
   if (categoryList.length === 0) {
     elements.categoryBar.hidden = true;
@@ -133,11 +142,12 @@ export function renderMenu() {
     return;
   }
 
-  const categoriesInView = [...new Set(filteredMenu.map(item => item.category).filter(Boolean))];
+  const categoriesInView = sortCategories(new Set(filteredMenu.map(item => item.category).filter(Boolean)));
 
   elements.menuList.innerHTML = categoriesInView.map(category => `
     <section class="section">
       <h2 class="section-title">${escapeHtml(CATEGORY_LABELS[category] || category)}</h2>
+      ${CATEGORY_DESCRIPTIONS[category] ? `<p class="section-description">${escapeHtml(CATEGORY_DESCRIPTIONS[category])}</p>` : ''}
       <div class="items-grid">
         ${filteredMenu.filter(item => item.category === category).map(renderMenuItemCard).join('')}
       </div>

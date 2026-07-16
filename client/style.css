@@ -279,6 +279,12 @@ body.cart-active .page-spacer {
   font-size: var(--text-2xl);
 }
 
+.section-description {
+  margin: -0.5rem 0 1rem;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
 .item-card {
   display: flex;
   align-items: center;

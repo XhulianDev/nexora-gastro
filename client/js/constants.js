@@ -24,17 +24,46 @@ export const STORAGE = Object.freeze({
 
 // 3. Etiketat e Sistemit (Domain Labels)
 export const CATEGORY_LABELS = Object.freeze({
+  brusket: 'Brusket',
   supat: 'Supa',
+  mengjesi: 'Mëngjesi',
+  sallata: 'Sallata',
+  pica: 'Pizza',
+  paragjelle_ftohte: 'Paragjellë e ftohtë',
+  paragjelle_ngrohte: 'Paragjellë e ngrohtë',
+  rizoto: 'Risotto',
+  pasta: 'Pasta',
+  pule: 'Mish pule',
+  mishra_nga_zgara: 'Mishra nga zgara',
+  biftek_special: 'Biftek special',
+  deti: 'Nga deti',
+  tradicionale: 'Tradicionale',
+  desert: 'Desert',
   senduic: 'Sanduiç',
   burger: 'Burgera',
-  rizoto: 'Rizoto',
-  sallata: 'Sallata',
-  pasta: 'Pasta',
-  pica: 'Pica',
-  pule: 'Mish Pule',
-  misherat: 'Mishërat',
-  deti: 'Deti',
-  desert: 'Desert'
+  misherat: 'Mishërat'
+});
+
+export const CATEGORY_ORDER = Object.freeze([
+  'brusket',
+  'supat',
+  'mengjesi',
+  'sallata',
+  'pica',
+  'paragjelle_ftohte',
+  'paragjelle_ngrohte',
+  'rizoto',
+  'pasta',
+  'pule',
+  'mishra_nga_zgara',
+  'biftek_special',
+  'deti',
+  'tradicionale',
+  'desert'
+]);
+
+export const CATEGORY_DESCRIPTIONS = Object.freeze({
+  mengjesi: 'Shërbehet nga ora 08:00 deri në 13:00.'
 });
 
 export const ORDER_STATUS = Object.freeze({

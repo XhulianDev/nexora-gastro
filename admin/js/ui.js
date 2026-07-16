@@ -1,9 +1,12 @@
 import { utils } from './utils.js';
 
 const CATEGORY_LABELS = {
-  supat: 'Supa', senduic: 'Sanduiç', burger: 'Burgera', rizoto: 'Rizoto',
-  sallata: 'Sallata', pasta: 'Pasta', pica: 'Pica', pule: 'Mish Pule',
-  misherat: 'Mishërat', deti: 'Ushqim Deti', desert: 'Ëmbëlsira'
+  brusket: 'Brusket', supat: 'Supa', mengjesi: 'Mëngjesi', sallata: 'Sallata',
+  pica: 'Pizza', paragjelle_ftohte: 'Paragjellë e ftohtë',
+  paragjelle_ngrohte: 'Paragjellë e ngrohtë', rizoto: 'Risotto', pasta: 'Pasta',
+  pule: 'Mish pule', mishra_nga_zgara: 'Mishra nga zgara',
+  biftek_special: 'Biftek special', deti: 'Nga deti', tradicionale: 'Tradicionale',
+  desert: 'Desert', senduic: 'Sanduiç', burger: 'Burgera', misherat: 'Mishërat'
 };
 
 const STATUS_LABELS = { new: 'E re', preparing: 'Në përgatitje', done: 'E gatshme' };
