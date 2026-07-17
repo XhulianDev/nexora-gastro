@@ -39,6 +39,11 @@ export const CATEGORY_LABELS = Object.freeze({
   deti: 'Nga deti',
   tradicionale: 'Tradicionale',
   desert: 'Desert',
+  pije_te_nxehta: 'Pije të nxehta',
+  pije_te_ftohta: 'Pije të ftohta & freskuese',
+  kafe_te_ftohta: 'Kafe të ftohta',
+  uje: 'Ujë',
+  kokteje: 'Kokteje',
   senduic: 'Sanduiç',
   burger: 'Burgera',
   misherat: 'Mishërat'
@@ -59,7 +64,12 @@ export const CATEGORY_ORDER = Object.freeze([
   'biftek_special',
   'deti',
   'tradicionale',
-  'desert'
+  'desert',
+  'pije_te_nxehta',
+  'pije_te_ftohta',
+  'kafe_te_ftohta',
+  'uje',
+  'kokteje'
 ]);
 
 export const CATEGORY_DESCRIPTIONS = Object.freeze({

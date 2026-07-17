@@ -9,6 +9,28 @@ const CATEGORY_LABELS = {
   desert: 'Desert', senduic: 'Sanduiç', burger: 'Burgera', misherat: 'Mishërat'
 };
 
+const CATEGORY_ORDER = [
+  'brusket',
+  'supat',
+  'mengjesi',
+  'sallata',
+  'pica',
+  'paragjelle_ftohte',
+  'paragjelle_ngrohte',
+  'rizoto',
+  'pasta',
+  'pule',
+  'mishra_nga_zgara',
+  'biftek_special',
+  'deti',
+  'tradicionale',
+  'desert',
+];
+
+const CATEGORY_ORDER_INDEX = new Map(
+  CATEGORY_ORDER.map((category, index) => [category, index])
+);
+
 const STATUS_LABELS = { new: 'E re', preparing: 'Në përgatitje', done: 'E gatshme' };
 const STATUS_CLASSES = { new: 'status-new', preparing: 'status-preparing', done: 'status-done' };
 
@@ -351,6 +373,10 @@ export const ui = {
     if (!container) return;
 
     const safeItems = Array.isArray(items) ? items : [];
+    const hasAnyImage = safeItems.some((item) => String(item.image || '').trim());
+    const menuTable = container.closest('.menu-table');
+    menuTable?.classList.toggle('menu-table--has-images', hasAnyImage);
+
     const term = String(searchTerm || '').toLowerCase().trim();
     const filtered = safeItems.filter((item) =>
       String(item.name || '').toLowerCase().includes(term)
@@ -361,16 +387,26 @@ export const ui = {
       return;
     }
 
-    container.innerHTML = filtered.map(item => `
+    const sorted = [...filtered].sort((a, b) => {
+      const categoryA = CATEGORY_ORDER_INDEX.get(a.category) ?? Number.MAX_SAFE_INTEGER;
+      const categoryB = CATEGORY_ORDER_INDEX.get(b.category) ?? Number.MAX_SAFE_INTEGER;
+
+      if (categoryA !== categoryB) return categoryA - categoryB;
+      return Number(a.id) - Number(b.id);
+    });
+
+    container.innerHTML = sorted.map(item => `
       <div class="menu-row">
-        <div class="menu-image-cell" style="background-image: url('${utils.escape(item.image || '')}')"></div>
-        <div>
+        ${hasAnyImage
+          ? `<div class="menu-image-cell" style="background-image: url('${utils.escape(item.image || '')}')"></div>`
+          : ''}
+        <div class="menu-main">
           <div class="menu-name">${utils.escape(item.name || '')}</div>
           <div class="menu-desc">${utils.escape(item.description || '')}</div>
         </div>
         <div><span class="cat-pill">${utils.escape(CATEGORY_LABELS[item.category] || item.category || '-')}</span></div>
         <div class="menu-price">${utils.formatMoney(item.price)}</div>
-        <div>
+        <div class="menu-status">
           <label class="toggle-switch">
             <input type="checkbox" data-action="toggle-menu-item" data-item-id="${item.id}" ${item.active ? 'checked' : ''} />
             <div class="toggle-track"></div><div class="toggle-thumb"></div>

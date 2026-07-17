@@ -71,7 +71,9 @@ function getNotePlaceholder(items = []) {
   if (categories.size === 1) {
     const [category] = [...categories];
     if (category === 'desert') return 'Opsionale: pa arra, me çokollatë shtesë...';
-    if (category === 'pije') return 'Opsionale: pa akull, me limon...';
+    if (['pije_te_nxehta', 'pije_te_ftohta', 'kafe_te_ftohta', 'uje', 'kokteje'].includes(category)) {
+      return 'Opsionale: pa akull, me limon, pa sheqer...';
+    }
     if (category === 'supat') return 'Opsionale: më pak kripë, pa majdanoz...';
     if (category === 'sallata') return 'Opsionale: pa domate, salcë veçmas...';
     return 'Opsionale: pa qepë, ekstra djathë...';
@@ -149,7 +151,11 @@ export function renderMenu() {
       <h2 class="section-title">${escapeHtml(CATEGORY_LABELS[category] || category)}</h2>
       ${CATEGORY_DESCRIPTIONS[category] ? `<p class="section-description">${escapeHtml(CATEGORY_DESCRIPTIONS[category])}</p>` : ''}
       <div class="items-grid">
-        ${filteredMenu.filter(item => item.category === category).map(renderMenuItemCard).join('')}
+        ${filteredMenu
+          .filter(item => item.category === category)
+          .sort((a, b) => Number(a.id) - Number(b.id))
+          .map(renderMenuItemCard)
+          .join('')}
       </div>
     </section>
   `).join('');
@@ -157,16 +163,21 @@ export function renderMenu() {
 
 function renderMenuItemCard(item) {
   const quantity = state.cart[item.id] || 0;
-  const imageStyle = item.image ? `style="background-image: url('${escapeHtml(item.image)}');"` : '';
+
+  const imageHtml = item.image
+    ? `<div class="item-image" style="background-image: url('${escapeHtml(item.image)}');"></div>`
+    : '';
 
   return `
     <article class="item-card">
-      <div class="item-image" ${imageStyle}></div>
+      ${imageHtml}
+
       <div class="item-info">
         <div class="item-name">${escapeHtml(item.name || '')}</div>
         <div class="item-desc">${escapeHtml(item.description || '')}</div>
         <div class="item-price">${formatMoney(item.price)}</div>
       </div>
+
       ${quantity > 0 ? `
         <div class="qty-ctrl">
           <button class="qty-btn" data-action="change-qty" data-item-id="${item.id}" data-delta="-1">-</button>

@@ -7,9 +7,7 @@ const SESSION_KEY = 'nexora_gastro_staff_session';
 const SESSION_EXP_KEY = 'nexora_gastro_staff_session_expires_at';
 const ZONES = [
   { id: 'all', label: 'Të gjitha', range: '' },
-  { id: 'A', label: 'Zona A', range: '1–5' },
-  { id: 'B', label: 'Zona B', range: '6–10' },
-  { id: 'C', label: 'Zona C', range: '11–15' },
+  { id: 'A', label: 'Zona A', range: '1–10' },
 ];
 
 const supabase = createClient(CONFIG.supabaseUrl, CONFIG.supabaseKey);
@@ -81,7 +79,12 @@ function escapeHTML(value = '') {
 function formatMoney(value) { return Number(value || 0).toFixed(2) + ' €'; }
 function formatTime(value) { return value ? new Date(value).toLocaleTimeString('sq-AL', { hour: '2-digit', minute: '2-digit' }) : '-'; }
 function parseItems(value) { if (Array.isArray(value)) return value; try { return JSON.parse(value || '[]'); } catch { return []; } }
-function getZone(tableNumber) { const table = Number.parseInt(String(tableNumber || 0), 10); if (table >= 1 && table <= 5) return { id: 'A', label: 'Zona A' }; if (table >= 6 && table <= 10) return { id: 'B', label: 'Zona B' }; return { id: 'C', label: 'Zona C' }; }
+function getZone(tableNumber) {
+  const table = Number.parseInt(String(tableNumber || 0), 10);
+  return table >= 1 && table <= 10
+    ? { id: 'A', label: 'Zona A' }
+    : { id: 'unassigned', label: 'Pa zonë' };
+}
 function withZone(record) { if (record.zone?.label) return { ...record, zone_id: String(record.zone.label).replace('Zona ', ''), zone_label: record.zone.label }; const zone = getZone(record.table_number); return { ...record, zone_id: zone.id, zone_label: zone.label }; }
 function filterByZone(records) { const items = records.map(withZone); return state.activeZone === 'all' ? items : items.filter((record) => record.zone_id === state.activeZone); }
 function sessionValid() { return Boolean(state.sessionToken && state.sessionExpiresAt && new Date(state.sessionExpiresAt).getTime() > Date.now()); }
@@ -151,7 +154,7 @@ function startSessionWatch() {
 }
 
 function countByZone() {
-  const counts = { all: 0, A: 0, B: 0, C: 0 };
+  const counts = { all: 0, A: 0 };
   for (const item of [...state.orders, ...state.calls].map(withZone)) {
     counts.all += 1;
     if (counts[item.zone_id] != null) counts[item.zone_id] += 1;
