@@ -132,7 +132,7 @@ async function createOrder(supabase: ReturnType<typeof createServiceClient>, req
       status: 'new',
       customer_token: customerToken,
     })
-    .select('id, restaurant_id, table_number, items, total, note, status, rating, created_at')
+    .select('id, daily_number, business_date, restaurant_id, table_number, items, total, note, status, rating, created_at')
     .single();
 
   if (error) throw error;
@@ -158,7 +158,7 @@ async function getOrders(supabase: ReturnType<typeof createServiceClient>, req: 
       .in('status', ['new', 'preparing']),
     supabase
       .from('orders')
-      .select('id, restaurant_id, table_number, items, total, note, status, rating, created_at')
+      .select('id, daily_number, business_date, restaurant_id, table_number, items, total, note, status, rating, created_at')
       .eq('restaurant_id', restaurantId)
       .eq('customer_token', customerToken)
       .is('deleted_at', null)

@@ -2,6 +2,10 @@ import { API, CATEGORY_DESCRIPTIONS, CATEGORY_LABELS, CATEGORY_ORDER, ORDER_STAT
 import { escapeHtml, formatMoney } from './utils.js';
 import { state, elements, findMenuItemById, getUpsellSuggestion } from './state.js';
 
+function getOrderDisplayNumber(order) {
+  return Number(order?.daily_number) > 0 ? Number(order.daily_number) : String(order?.id || '').slice(-4);
+}
+
 /**
  * Përditëson etiketën e tavolinës në krye të faqes.
  */
@@ -89,9 +93,9 @@ export function renderMenuLoading() {
   elements.categoryBar.hidden = true;
   elements.menuList.innerHTML = `
     <section class="menu-state menu-state--loading" aria-live="polite">
-      <div class="menu-state__badge">Menuja</div>
+      <div class="menu-state__badge">Menyja</div>
       <h2>Duke ngarkuar menynë...</h2>
-      <p>Ju lutemi prisni pak. Po marrim artikujt aktivë të restorantit.</p>
+      <p>Ju lutemi prisni pak. Po marrim artikujt aktivë të restaurantit.</p>
       <div class="menu-skeleton" aria-hidden="true">
         <div></div><div></div><div></div>
       </div>
@@ -105,7 +109,7 @@ export function renderMenuError() {
   elements.menuList.innerHTML = `
     <section class="menu-state menu-state--error" role="alert">
       <div class="menu-state__badge">Njoftim</div>
-      <h2>Menuja nuk u ngarkua.</h2>
+      <h2>Menyja nuk u ngarkua.</h2>
       <p>Provoni përsëri. Nëse problemi vazhdon, thërrisni kamarierin nga tavolina.</p>
       <button class="button button--primary menu-state__action" type="button" data-action="retry-menu">Provo përsëri</button>
     </section>
@@ -117,7 +121,7 @@ export function renderEmptyMenu() {
 
   elements.menuList.innerHTML = `
     <section class="menu-state">
-      <div class="menu-state__badge">Menuja</div>
+      <div class="menu-state__badge">Menyja</div>
       <h2>Nuk ka artikuj të disponueshëm.</h2>
       <p>Ju lutemi thërrisni kamarierin për ndihmë ose provoni përsëri më vonë.</p>
     </section>
@@ -334,7 +338,7 @@ export function renderStatusHub(orders, keepOpen = false) {
           const statusInfo = ORDER_STATUS[order.status.toUpperCase()] || { label: order.status };
           return `
             <div class="status-hub__item">
-              <span class="status-hub__item-title">Porosia #${String(order.id).slice(-4)}</span>
+              <span class="status-hub__item-title">Porosia #${escapeHtml(getOrderDisplayNumber(order))}</span>
               <div class="status-hub__item-actions">
                 <small class="status-hub__status ${order.status === 'done' ? 'is-done' : ''}">${escapeHtml(statusInfo.label)}</small>
                 <a class="status-hub__link" href="/status/?id=${order.id}">Hap</a>

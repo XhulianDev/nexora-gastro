@@ -77,6 +77,7 @@ function escapeHTML(value = '') {
   return String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#039;');
 }
 function formatMoney(value) { return Number(value || 0).toFixed(2) + ' €'; }
+function getOrderDisplayNumber(order) { return Number(order?.daily_number) > 0 ? Number(order.daily_number) : order?.id; }
 function formatTime(value) { return value ? new Date(value).toLocaleTimeString('sq-AL', { hour: '2-digit', minute: '2-digit' }) : '-'; }
 function parseItems(value) { if (Array.isArray(value)) return value; try { return JSON.parse(value || '[]'); } catch { return []; } }
 function getZone(tableNumber) {
@@ -413,7 +414,7 @@ function renderOrders() {
               <section class="table-order-item status-${escapeHTML(order.status)}">
                 <div class="table-order-item-head">
                   <div>
-                    <strong>Porosia #${escapeHTML(order.id)}</strong>
+                    <strong>Porosia #${escapeHTML(getOrderDisplayNumber(order))}</strong>
                     <span>${escapeHTML(getOrderTimeMeta(order))}</span>
                   </div>
                   <span class="order-status-pill">${escapeHTML(getOrderStatusLabel(order.status))}</span>

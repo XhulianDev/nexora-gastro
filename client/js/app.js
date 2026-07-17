@@ -126,11 +126,11 @@ async function initMenu() {
     ui.renderMenu();
     ui.updateCartBar();
   } catch (error) {
-    console.error('Gabim në menunë:', error);
+    console.error('Gabim në menynë:', error);
     state.menu = [];
     ui.renderCategories();
     ui.renderMenuError();
-    ui.showToast('Menuja nuk u ngarkua. Provoni sërish ose thërrisni kamarierin.', 'error');
+    ui.showToast('Menyja nuk u ngarkua. Provoni sërish ose thërrisni kamarierin.', 'error');
   }
 }
 

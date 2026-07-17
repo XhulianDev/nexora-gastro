@@ -1018,3 +1018,136 @@ body.cart-active .page-spacer {
     font-size: var(--text-md);
   }
 }
+
+/* ========================================================================== 
+   Casa Mia pilot fixes - waiter dropdown and cart help action
+   ========================================================================== */
+.waiter-action-row {
+  position: relative;
+  align-items: center;
+}
+
+.waiter-action-menu {
+  position: fixed;
+  top: 7.15rem;
+  right: 1rem;
+  z-index: 1002;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+  width: min(10.5rem, calc(100vw - 2rem));
+  padding: 0.5rem;
+  border: 0.0625rem solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.95rem;
+  background: rgba(24, 24, 27, 0.97);
+  box-shadow: var(--shadow-elevated);
+  backdrop-filter: blur(1rem);
+}
+
+.waiter-action-menu .waiter-btn {
+  position: static;
+  width: 100%;
+  min-width: 0;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.75rem;
+  text-align: center;
+}
+
+.waiter-btn--payment {
+  border-color: rgba(221, 42, 123, 0.28);
+}
+
+.modal-help {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-top: 1rem;
+  padding: 0.85rem 0.9rem;
+  border: 0.0625rem solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-lg);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.modal-help > div:first-child {
+  min-width: 0;
+}
+
+.modal-help strong,
+.modal-help span {
+  display: block;
+}
+
+.modal-help strong {
+  margin-bottom: 0.18rem;
+  font-size: var(--text-base);
+}
+
+.modal-help span {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.35;
+}
+
+.modal-help__actions {
+  flex: 0 0 auto;
+}
+
+.modal-help__btn {
+  min-width: 5.5rem;
+  padding: 0.58rem 0.82rem;
+  border-radius: 0.8rem;
+  font-size: var(--text-md);
+  font-weight: 700;
+}
+
+@media (max-width: 48rem) {
+  .waiter-action-menu {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(11rem, calc(100vw - 2.5rem));
+  }
+}
+
+@media (max-width: 24rem) {
+  .modal-help {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .modal-help__btn {
+    width: 100%;
+  }
+}
+
+
+/* Final Casa Mia pilot: waiter options match the main Kamarier button size. */
+.waiter-action-menu {
+  width: 7rem;
+  padding: 0.35rem;
+}
+
+.waiter-action-menu .waiter-btn {
+  width: 100%;
+  min-width: 0;
+  padding: 0.55rem 0.95rem;
+  border-radius: 1.25rem;
+  font-size: 0.88rem;
+  line-height: 1.15;
+}
+
+@media (max-width: 48rem) {
+  .waiter-action-menu {
+    width: 6.8rem;
+  }
+
+  .waiter-action-menu .waiter-btn {
+    padding: 0.46rem 0.76rem;
+    border-radius: 1.15rem;
+    font-size: 0.83rem;
+  }
+}

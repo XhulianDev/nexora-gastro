@@ -34,6 +34,10 @@ const CATEGORY_ORDER_INDEX = new Map(
 const STATUS_LABELS = { new: 'E re', preparing: 'Në përgatitje', done: 'E gatshme' };
 const STATUS_CLASSES = { new: 'status-new', preparing: 'status-preparing', done: 'status-done' };
 
+function getOrderDisplayNumber(order) {
+  return Number(order?.daily_number) > 0 ? Number(order.daily_number) : order?.id;
+}
+
 function parseItems(value) {
   return utils.parseItems(value).map((item) => ({
     name: item.name || item.title || 'Artikull',
@@ -296,7 +300,7 @@ export const ui = {
                 <section class="table-order-item ${STATUS_CLASSES[order.status] || ''}">
                   <div class="table-order-item-head">
                     <div>
-                      <strong>Porosia #${utils.escape(String(order.id))}</strong>
+                      <strong>Porosia #${utils.escape(String(getOrderDisplayNumber(order)))}</strong>
                       <span>${utils.escape(orderTimeMeta(order))}</span>
                     </div>
                     <span class="status-pill ${STATUS_CLASSES[order.status] || ''}">${STATUS_LABELS[order.status] || utils.escape(order.status || '—')}</span>
@@ -597,7 +601,7 @@ export const ui = {
             <article class="archive-row is-archived">
               <div class="archive-row-main">
                 <div>
-                  <div class="archive-title">#${utils.escape(String(order.id))} · Tavolina ${utils.escape(String(order.table_number || '-'))}</div>
+                  <div class="archive-title">#${utils.escape(String(getOrderDisplayNumber(order)))} · Tavolina ${utils.escape(String(order.table_number || '-'))}</div>
                   <div class="archive-meta">${utils.formatTime(order.created_at)}${archivedText} · ${zoneBadge(order)} · ${items.length} artikuj</div>
                 </div>
                 <div class="archive-row-side">
