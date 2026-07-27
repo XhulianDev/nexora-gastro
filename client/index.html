@@ -3,68 +3,79 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Meny – Casa Mia Terrazza</title>
+  <meta name="theme-color" content="#171311" />
+  <title>Menyja – Casa Mia Terrazza</title>
+  <meta name="description" content="Menyja digjitale e Restaurant Casa Mia Terrazza, Fshati Gojbulë." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=ng-5-1-3" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css?v=premium-3-25" />
 </head>
 <body>
+  <header class="hero" aria-label="Restaurant Casa Mia Terrazza">
+    <div class="hero__media" aria-hidden="true"></div>
+    <div class="hero__veil" aria-hidden="true"></div>
 
-  <aside id="status-hub-container" aria-live="polite"></aside>
+    <div class="hero__topbar">
+      <span class="hero__location">Vushtrri, Kosovë</span>
+      <span class="hero__edition">Fshati Gojbulë</span>
+    </div>
 
-  <header class="page-header">
-    <div id="table-label" class="page-header__table-label">Tavolina --</div>
-    <h1 class="page-header__title">Casa Mia Terrazza</h1>
+    <div class="hero__content">
+      <div class="brand-lockup brand-lockup--hero" role="img" aria-label="Casa Mia Terrazza">
+        <span class="brand-lockup__shape" aria-hidden="true"></span>
+        <span class="brand-lockup__name">Casa Mia</span>
+        <span class="brand-lockup__sub">terrazza</span>
+      </div>
+
+      <p class="hero__eyebrow">Restaurant Casa Mia Terrazza</p>
+      <h1>Shije për t’u kujtuar.</h1>
+      <div class="hero__rule" aria-hidden="true"><i></i><b></b><i></i></div>
+      <p class="hero__intro">Nga mëngjesi deri në mbrëmje, zgjidhni atë që ju shijon.</p>
+      <a class="hero__cta" href="#cat-bar">
+        <span>Shfleto menynë</span>
+        <span class="hero__cta-arrow" aria-hidden="true">↓</span>
+      </a>
+    </div>
   </header>
-
-
-  <section class="client-intro" aria-label="Udhëzim i shkurtër">
-    <p>Shfletoni menynë, shtoni artikuj në porosi ose thërrisni kamarierin nga tavolina juaj.</p>
-  </section>
 
   <nav id="cat-bar" class="categories" aria-label="Kategoritë e menysë" hidden></nav>
 
-  <main id="menu-list" class="menu-list"></main>
+  <main id="menu-list" class="menu-list" aria-live="polite"></main>
 
-  <div class="page-spacer" aria-hidden="true"></div>
-
-  <section id="cart-bar" class="cart-bar" aria-label="Përmbledhja e porosisë">
-    <div id="cart-preview" class="cart-preview" role="list"></div>
-
-    <footer class="cart-footer">
-      <div class="cart-summary">
-        <span class="cart-summary__label">Total</span>
-        <output id="cart-total" class="cart-summary__value">0.00 €</output>
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <div class="site-footer__brand">
+        <div class="brand-lockup brand-lockup--footer" role="img" aria-label="Casa Mia Terrazza">
+          <span class="brand-lockup__shape" aria-hidden="true"></span>
+          <span class="brand-lockup__name">Casa Mia</span>
+          <span class="brand-lockup__sub">terrazza</span>
+        </div>
+        <p>Ju bëftë mirë.</p>
       </div>
 
-      <button id="cart-open-btn" class="button button--primary cart-btn-main" type="button">
-        Porosit <span id="cart-count" class="cart-count-badge"></span>
-      </button>
-    </footer>
-  </section>
-
-  <div id="overlay" class="overlay" aria-hidden="true">
-    <section id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <header class="modal__header">
-        <h2 id="modal-title" class="modal__title">Përmbledhja e porosisë</h2>
-      </header>
-      <div id="modal-body" class="modal__body"></div>
-    </section>
-  </div>
-
-  <template id="template-item">
-    <article class="item-card">
-      <div class="item-image"></div>
-      <div class="item-info">
-        <h3 class="item-name"></h3>
-        <p class="item-desc"></p>
-        <span class="item-price"></span>
+      <div class="site-footer__details" aria-label="Informacione për restorantin">
+        <div class="site-footer__detail">
+          <span>Lokacioni</span>
+          <strong>Fshati Gojbulë</strong>
+          <small>Vushtrri, Kosovë</small>
+        </div>
+        <div class="site-footer__detail">
+          <span>Restoranti</span>
+          <strong>Casa Mia Terrazza</strong>
+          <small>Restaurant · Terrazza</small>
+        </div>
       </div>
-      <div class="qty-ctrl"></div>
-    </article>
-  </template>
+    </div>
 
-  <script type="module" src="js/app.js?v=pilot-casa-mia-2"></script>
+    <div class="site-footer__bottom">
+      <div>
+        <span>Faleminderit që na zgjodhët.</span>
+        <small>Meny digjitale nga Nexora Gastro</small>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="js/app.js?v=premium-3-24"></script>
 </body>
 </html>

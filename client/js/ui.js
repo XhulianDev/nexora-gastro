@@ -1,32 +1,81 @@
-import { API, CATEGORY_DESCRIPTIONS, CATEGORY_LABELS, CATEGORY_ORDER, ORDER_STATUS } from './constants.js';
+import { CATEGORY_DESCRIPTIONS, CATEGORY_LABELS, CATEGORY_ORDER } from './constants.js';
 import { escapeHtml, formatMoney } from './utils.js';
-import { state, elements, findMenuItemById, getUpsellSuggestion } from './state.js';
+import { state, elements } from './state.js';
 
-function getOrderDisplayNumber(order) {
-  return Number(order?.daily_number) > 0 ? Number(order.daily_number) : String(order?.id || '').slice(-4);
+const MENU_IMAGE_BY_NAME = Object.freeze({
+  'brusketa domate mocarella': 'client/assets/menu/brusketa-domate-mocarella.webp',
+  'brusketa domate mozzarella': 'client/assets/menu/brusketa-domate-mocarella.webp',
+  'brusketa kikiriku': 'client/assets/menu/brusketa-kikiriku.webp',
+  'brusketa salmon i tymosur': 'client/assets/menu/brusketa-salmon.webp',
+  'brusketa salmon tymosur': 'client/assets/menu/brusketa-salmon.webp',
+  'supe peshku': 'client/assets/menu/supe-peshku.webp',
+  'sallate fshati greke shope': 'client/assets/menu/sallate-fshati-greke-shope.webp',
+  'sallate cezar': 'client/assets/menu/sallate-cezar.webp'
+});
+
+function normalizeMenuName(value = '') {
+  return String(value)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
 }
 
-/**
- * Përditëson etiketën e tavolinës në krye të faqes.
- */
-export function setTableLabel() {
-  if (elements.tableLabel) {
-    elements.tableLabel.textContent = `Tavolina ${state.tableNumber}`;
+function getMenuItemImage(item) {
+  const suppliedImage = String(item?.image || '').trim();
+  if (suppliedImage) return suppliedImage;
+
+  const normalizedName = normalizeMenuName(item?.name);
+  const exactMatch = MENU_IMAGE_BY_NAME[normalizedName];
+  if (exactMatch) return exactMatch;
+
+  // Emri në databazë mund të përmbajë fjalë si “me”, “dhe” ose simbolin “&”.
+  // Për këtë arsye, fotoja e brusketës lidhet edhe sipas përbërësve kryesorë.
+  const isTomatoMozzarellaBruschetta =
+    normalizedName.includes('brusket') &&
+    normalizedName.includes('domate') &&
+    (normalizedName.includes('mocarella') || normalizedName.includes('mozzarella'));
+
+  if (isTomatoMozzarellaBruschetta) {
+    return 'client/assets/menu/brusketa-domate-mocarella.webp';
   }
-}
 
-/**
- * Dërgon përdoruesit te një kategori specifike, mbyll modalin dhe bën scroll.
- */
-export function navigateToCategory(category) {
-  state.activeCategory = category;
-  renderCategories();
-  renderMenu();
-  closeModal();
 
-  setTimeout(() => {
-    elements.menuList?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 100);
+  const isPeanutBruschetta =
+    normalizedName.includes('brusket') &&
+    normalizedName.includes('kikirik');
+
+  if (isPeanutBruschetta) {
+    return 'client/assets/menu/brusketa-kikiriku.webp';
+  }
+
+  const isSmokedSalmonBruschetta =
+    normalizedName.includes('brusket') &&
+    normalizedName.includes('salmon') &&
+    normalizedName.includes('tymos');
+
+  if (isSmokedSalmonBruschetta) {
+    return 'client/assets/menu/brusketa-salmon.webp';
+  }
+
+  const isVillageSalad =
+    normalizedName.includes('sallat') &&
+    normalizedName.includes('fshati');
+
+  if (isVillageSalad) {
+    return 'client/assets/menu/sallate-fshati-greke-shope.webp';
+  }
+
+  const isCaesarSalad =
+    normalizedName.includes('sallat') &&
+    normalizedName.includes('cezar');
+
+  if (isCaesarSalad) {
+    return 'client/assets/menu/sallate-cezar.webp';
+  }
+
+  return '';
 }
 
 function sortCategories(categories = []) {
@@ -38,15 +87,11 @@ function sortCategories(categories = []) {
   });
 }
 
-/**
- * Renderon butonat e kategorive në shiritin horizontal.
- */
 export function renderCategories() {
   if (!elements.categoryBar) return;
 
-  const categoryList = sortCategories(new Set(state.menu.map(item => item.category).filter(Boolean)));
-
-  if (categoryList.length === 0) {
+  const categoryList = sortCategories(new Set(state.menu.map((item) => item.category).filter(Boolean)));
+  if (!categoryList.length) {
     elements.categoryBar.hidden = true;
     return;
   }
@@ -54,323 +99,127 @@ export function renderCategories() {
   elements.categoryBar.hidden = false;
   elements.categoryBar.innerHTML = [
     renderCategoryButton('all', 'Të gjitha', state.activeCategory === 'all'),
-    ...categoryList.map(cat => 
-      renderCategoryButton(cat, CATEGORY_LABELS[cat] || cat, state.activeCategory === cat)
-    )
+    ...categoryList.map((category) => renderCategoryButton(
+      category,
+      CATEGORY_LABELS[category] || category,
+      state.activeCategory === category
+    ))
   ].join('');
 }
 
 function renderCategoryButton(category, label, isActive) {
   return `
-    <button type="button" 
-            class="category-btn ${isActive ? 'active' : ''}" 
-            data-category="${escapeHtml(category)}">
+    <button type="button" class="category-btn ${isActive ? 'active' : ''}" data-category="${escapeHtml(category)}">
       ${escapeHtml(label)}
     </button>`;
 }
 
-function getNotePlaceholder(items = []) {
-  const categories = new Set(items.map((item) => item.category).filter(Boolean));
-
-  if (categories.size === 1) {
-    const [category] = [...categories];
-    if (category === 'desert') return 'Opsionale: pa arra, me çokollatë shtesë...';
-    if (['pije_te_nxehta', 'pije_te_ftohta', 'kafe_te_ftohta', 'uje', 'kokteje'].includes(category)) {
-      return 'Opsionale: pa akull, me limon, pa sheqer...';
-    }
-    if (category === 'supat') return 'Opsionale: më pak kripë, pa majdanoz...';
-    if (category === 'sallata') return 'Opsionale: pa domate, salcë veçmas...';
-    return 'Opsionale: pa qepë, ekstra djathë...';
-  }
-
-  return 'Opsionale: shënim i shkurtër për porosinë...';
-}
-
-
 export function renderMenuLoading() {
-  if (!elements.categoryBar || !elements.menuList) return;
-
-  elements.categoryBar.hidden = true;
+  if (!elements.menuList) return;
   elements.menuList.innerHTML = `
-    <section class="menu-state menu-state--loading" aria-live="polite">
-      <div class="menu-state__badge">Menyja</div>
-      <h2>Duke ngarkuar menynë...</h2>
-      <p>Ju lutemi prisni pak. Po marrim artikujt aktivë të restaurantit.</p>
-      <div class="menu-skeleton" aria-hidden="true">
-        <div></div><div></div><div></div>
-      </div>
-    </section>
-  `;
+    <section class="menu-state">
+      <span class="menu-state__mark">Casa Mia</span>
+      <h2>Duke ngarkuar menynë…</h2>
+      <div class="menu-skeleton" aria-hidden="true"><i></i><i></i><i></i></div>
+    </section>`;
 }
 
 export function renderMenuError() {
   if (!elements.menuList) return;
-
   elements.menuList.innerHTML = `
     <section class="menu-state menu-state--error" role="alert">
-      <div class="menu-state__badge">Njoftim</div>
+      <span class="menu-state__mark">Njoftim</span>
       <h2>Menyja nuk u ngarkua.</h2>
-      <p>Provoni përsëri. Nëse problemi vazhdon, thërrisni kamarierin nga tavolina.</p>
-      <button class="button button--primary menu-state__action" type="button" data-action="retry-menu">Provo përsëri</button>
-    </section>
-  `;
+      <p>Ju lutemi rifreskoni faqen ose kontaktoni stafin.</p>
+      <button class="retry-button" type="button" onclick="window.location.reload()">Provo përsëri</button>
+    </section>`;
 }
 
 export function renderEmptyMenu() {
   if (!elements.menuList) return;
-
   elements.menuList.innerHTML = `
     <section class="menu-state">
-      <div class="menu-state__badge">Menyja</div>
-      <h2>Nuk ka artikuj të disponueshëm.</h2>
-      <p>Ju lutemi thërrisni kamarierin për ndihmë ose provoni përsëri më vonë.</p>
-    </section>
-  `;
+      <span class="menu-state__mark">Casa Mia</span>
+      <h2>Nuk ka artikuj aktivë për momentin.</h2>
+    </section>`;
 }
 
-/**
- * Renderon listën e produkteve të grupuara sipas kategorive.
- */
 export function renderMenu() {
   if (!elements.menuList) return;
+  if (!state.menu.length) return renderEmptyMenu();
 
-  if (!state.menu.length) {
-    renderEmptyMenu();
-    return;
-  }
+  const filteredMenu = state.activeCategory === 'all'
+    ? state.menu
+    : state.menu.filter((item) => item.category === state.activeCategory);
 
-  const filteredMenu = state.activeCategory === 'all' 
-    ? state.menu 
-    : state.menu.filter(item => item.category === state.activeCategory);
+  if (!filteredMenu.length) return renderEmptyMenu();
 
-  if (!filteredMenu.length) {
-    renderEmptyMenu();
-    return;
-  }
+  const categoriesInView = sortCategories(new Set(filteredMenu.map((item) => item.category).filter(Boolean)));
 
-  const categoriesInView = sortCategories(new Set(filteredMenu.map(item => item.category).filter(Boolean)));
-
-  elements.menuList.innerHTML = categoriesInView.map(category => `
-    <section class="section">
-      <h2 class="section-title">${escapeHtml(CATEGORY_LABELS[category] || category)}</h2>
-      ${CATEGORY_DESCRIPTIONS[category] ? `<p class="section-description">${escapeHtml(CATEGORY_DESCRIPTIONS[category])}</p>` : ''}
-      <div class="items-grid">
+  elements.menuList.innerHTML = categoriesInView.map((category) => `
+    <section class="menu-section reveal" id="category-${escapeHtml(category)}">
+      <header class="menu-section__header">
+        <h2>${escapeHtml(CATEGORY_LABELS[category] || category)}</h2>
+        ${CATEGORY_DESCRIPTIONS[category] ? `<p>${escapeHtml(CATEGORY_DESCRIPTIONS[category])}</p>` : ''}
+      </header>
+      <div class="items-list">
         ${filteredMenu
-          .filter(item => item.category === category)
+          .filter((item) => item.category === category)
           .sort((a, b) => Number(a.id) - Number(b.id))
-          .map(renderMenuItemCard)
+          .map(renderMenuItem)
           .join('')}
       </div>
-    </section>
-  `).join('');
+    </section>`).join('');
+
+  requestAnimationFrame(() => observeRenderedSections());
 }
 
-function renderMenuItemCard(item) {
-  const quantity = state.cart[item.id] || 0;
-
-  const imageHtml = item.image
-    ? `<div class="item-image" style="background-image: url('${escapeHtml(item.image)}');"></div>`
-    : '';
-
-  return `
-    <article class="item-card">
-      ${imageHtml}
-
-      <div class="item-info">
-        <div class="item-name">${escapeHtml(item.name || '')}</div>
-        <div class="item-desc">${escapeHtml(item.description || '')}</div>
-        <div class="item-price">${formatMoney(item.price)}</div>
-      </div>
-
-      ${quantity > 0 ? `
-        <div class="qty-ctrl">
-          <button class="qty-btn" data-action="change-qty" data-item-id="${item.id}" data-delta="-1">-</button>
-          <span class="qty-value">${quantity}</span>
-          <button class="qty-btn" data-action="change-qty" data-item-id="${item.id}" data-delta="1">+</button>
-        </div>` : `
-        <button class="button button--primary icon-btn" data-action="change-qty" data-item-id="${item.id}" data-delta="1">+</button>
-      `}
-    </article>
-  `;
-}
-
-/**
- * Përditëson shiritin e shportës (Cart Bar).
- */
-export function updateCartBar() {
-  const entries = Object.entries(state.cart);
-  const totalItems = entries.reduce((sum, [, qty]) => sum + qty, 0);
-  const totalPrice = entries.reduce((sum, [id, qty]) => {
-    const item = findMenuItemById(id);
-    return sum + (item ? parseFloat(item.price) * qty : 0);
-  }, 0);
-
-  if (elements.cartTotal) elements.cartTotal.textContent = formatMoney(totalPrice);
-  if (elements.cartCount) elements.cartCount.textContent = totalItems > 0 ? `(${totalItems})` : '';
-  
-  if (elements.cartPreview) {
-    elements.cartPreview.innerHTML = entries.map(([id, qty]) => {
-      const item = findMenuItemById(id);
-      if (!item) return '';
-      return `
-        <div class="preview-item">
-          <span class="preview-item__name">${escapeHtml(item.name)}</span>
-          <div class="preview-item__qty-box">
-            <button class="preview-item__qty-btn" data-action="change-qty" data-item-id="${item.id}" data-delta="-1">-</button>
-            <span class="preview-item__qty-value">${qty}</span>
-            <button class="preview-item__qty-btn" data-action="change-qty" data-item-id="${item.id}" data-delta="1">+</button>
-          </div>
-          <span class="preview-item__price">${formatMoney(parseFloat(item.price) * qty)}</span>
-        </div>`;
-    }).join('');
-  }
-
-  elements.cartBar?.classList.toggle('visible', totalItems > 0);
-  document.body.classList.toggle('cart-active', totalItems > 0);
-
-  requestAnimationFrame(() => {
-    if (!elements.cartBar || totalItems === 0) {
-      document.documentElement.style.setProperty('--cart-spacer', '0px');
-      return;
-    }
-
-    const cartHeight = elements.cartBar.offsetHeight || 0;
-    document.documentElement.style.setProperty('--cart-spacer', `${cartHeight + 12}px`);
-  });
-}
-
-/**
- * Menaxhimi i Modalit
- */
-export function openModal() {
-  if (Object.keys(state.cart).length === 0) return;
-  renderModalContent();
-  elements.overlay?.classList.add('is-visible');
-}
-
-export function closeModal() {
-  elements.overlay?.classList.remove('is-visible');
-}
-
-export function renderModalContent() {
-  if (!elements.modalBody) return;
-
-  const cartItems = Object.entries(state.cart).map(([id, qty]) => {
-    const item = findMenuItemById(id);
-    return item ? { ...item, qty } : null;
-  }).filter(Boolean);
-
-  if (cartItems.length === 0) return closeModal();
-
-  const total = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.qty), 0);
-  const suggestion = getUpsellSuggestion();
-
-  elements.modalBody.innerHTML = `
-    <div class="modal__items">
-      ${cartItems.map(item => `
-        <div class="modal__item">
-          <div class="modal__item-info">
-            <div class="modal__item-name">${escapeHtml(item.name)}</div>
-            <div class="modal__item-price">${formatMoney(parseFloat(item.price) * item.qty)}</div>
-          </div>
-          <div class="qty-ctrl">
-            <button class="qty-btn" data-action="change-qty" data-item-id="${item.id}" data-delta="-1">-</button>
-            <span class="qty-value">${item.qty}</span>
-            <button class="qty-btn" data-action="change-qty" data-item-id="${item.id}" data-delta="1">+</button>
-          </div>
-        </div>
-      `).join('')}
-    </div>
-    
-    ${suggestion ? `
-      <div class="upsell">
-        <div class="upsell__text">Sugjerim për ju</div>
-        <div class="upsell__actions">
-          <button class="upsell-btn" data-action="upsell-add" data-item-id="${suggestion.id}">
-            Shto ${escapeHtml(suggestion.name)} <span>+${formatMoney(suggestion.price)}</span>
-          </button>
-          <button class="upsell-view-all-btn" data-action="view-category" data-category="${suggestion.category || 'all'}">
-            Shihni të gjitha
-          </button>
-        </div>
-      </div>` : ''}
-
-    <div class="modal-help">
-      <div>
-        <strong>Ndihmë për porosinë?</strong>
-        <span>Thirrni kamarierin pa mbyllur shportën.</span>
-      </div>
-      <div class="modal-help__actions">
-        <button class="button button--ghost modal-help__btn" data-action="call-waiter" data-call-type="help" type="button">Ndihmë</button>
-      </div>
-    </div>
-
-    <div class="note-field-wrap">
-      <textarea id="note" class="note-field" maxlength="${API.ORDER_NOTE_MAX_LENGTH}" placeholder="${escapeHtml(getNotePlaceholder(cartItems))}"></textarea>
-      <div class="note-limit">Maks. ${API.ORDER_NOTE_MAX_LENGTH} karaktere</div>
-    </div>
-    <button id="send-btn" class="button button--primary confirm-btn" data-action="send-order">
-      Dërgo porosinë (${formatMoney(total)})
-    </button>
-  `;
-}
-
-export function renderStatusHub(orders, keepOpen = false) {
-  if (!elements.statusHubContainer) return;
-  if (!orders.length) {
-    elements.statusHubContainer.innerHTML = '';
+function observeRenderedSections() {
+  const sections = elements.menuList.querySelectorAll('.reveal');
+  if (!('IntersectionObserver' in window)) {
+    sections.forEach((section) => section.classList.add('is-visible'));
     return;
   }
 
-  const hasDoneOrder = orders.some(o => o.status === 'done');
-  
-  elements.statusHubContainer.innerHTML = `
-    <div class="status-hub">
-      <div class="status-hub__main">
-        <div class="status-hub__info">
-          <div class="status-hub__dot ${hasDoneOrder ? 'is-done' : ''}"></div>
-          <span><strong>${orders.length} Porosi</strong> aktive</span>
-        </div>
-        <button class="button button--ghost status-hub__toggle-btn" data-action="toggle-hub">Shiko listën</button>
-      </div>
-      <div id="hub-drop" class="status-hub__dropdown ${keepOpen ? 'is-open' : ''}">
-        ${[...orders].reverse().map(order => {
-          const statusInfo = ORDER_STATUS[order.status.toUpperCase()] || { label: order.status };
-          return `
-            <div class="status-hub__item">
-              <span class="status-hub__item-title">Porosia #${escapeHtml(getOrderDisplayNumber(order))}</span>
-              <div class="status-hub__item-actions">
-                <small class="status-hub__status ${order.status === 'done' ? 'is-done' : ''}">${escapeHtml(statusInfo.label)}</small>
-                <a class="status-hub__link" href="/status/?id=${order.id}">Hap</a>
-              </div>
-            </div>`;
-        }).join('')}
-        <div class="status-hub__footer">
-            <button class="button button--primary status-hub__view-all-btn" data-action="view-all-status">SHIKO TË GJITHA</button>
-        </div>
-      </div>
-    </div>
-  `;
+  const observer = new IntersectionObserver((entries, currentObserver) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('is-visible');
+      currentObserver.unobserve(entry.target);
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -36px' });
+
+  sections.forEach((section) => observer.observe(section));
 }
 
-export function toggleHubDropdown() {
-  document.querySelector('#hub-drop')?.classList.toggle('is-open');
-}
+function renderMenuItem(item) {
+  const image = getMenuItemImage(item);
+  const hasImage = Boolean(image);
 
-/**
- * Shfaq një njoftim të përkohshëm (toast) në ekran.
- * @param {string} message - Mesazhi për t'u shfaqur.
- * @param {string} type - Tipi i njoftimit ('success' ose 'error').
- */
-export function showToast(message, type = 'success') {
-  const toast = document.createElement('div');
-  toast.className = `toast-notification is-${type}`;
-  toast.textContent = message;
-  
-  document.body.appendChild(toast);
-
-  // Fshije elementin pas animacionit
-  setTimeout(() => {
-    toast.remove();
-  }, 3300); // Koha duhet të jetë pak më e gjatë se animacioni (3s + 0.3s)
+  return `
+    <article class="menu-item ${hasImage ? 'menu-item--featured' : ''}">
+      ${hasImage ? `
+        <div class="menu-item__media">
+          <img
+            src="${escapeHtml(image)}"
+            alt="${escapeHtml(item.name || 'Artikull i menysë')}"
+            width="800"
+            height="600"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>` : ''}
+      <div class="menu-item__body">
+        <div class="menu-item__heading">
+          <div class="menu-item__copy">
+            <h3>${escapeHtml(item.name || '')}</h3>
+          </div>
+          <span class="menu-item__leader" aria-hidden="true"></span>
+          <strong class="menu-item__price">${formatMoney(item.price)}</strong>
+        </div>
+        <div class="menu-item__copy">
+          ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ''}
+        </div>
+      </div>
+    </article>`;
 }
