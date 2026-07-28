@@ -416,7 +416,7 @@ img{display:block;max-width:100%}
   /* Keep both location anchors visible on mobile: city left, village right. */
   .hero__edition{display:inline}
   .hero__topbar{gap:1rem}
-  .hero__location,.hero__edition{white-space:nowrap}
+  .hero__location,.hero__edition{white-space:nowrap; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95),    0 2px 8px rgba(0, 0, 0, 0.80),    0 0 14px rgba(0, 0, 0, 0.60)}
 
   .hero__intro{font-size:.96rem;line-height:1.62}
 
