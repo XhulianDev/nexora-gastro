@@ -112,6 +112,45 @@ img{display:block;max-width:100%}
 .reveal.is-visible{opacity:1;transform:none}
 @keyframes pulse{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
+.nexbot-chat-widget {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background-color: #e0a96d; /* Premium gold/bronze color matching the Casa Mia palette */
+      color: #171311; /* Dark shade for high contrast readability */
+      text-decoration: none;
+      padding: 12px 18px;
+      border-radius: 30px;
+      font-family: 'Manrope', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      z-index: 9999;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    .nexbot-chat-widget:hover {
+      transform: scale(1.05);
+      background-color: #f0be85;
+    }
+    .nexbot-chat-icon {
+      font-size: 18px;
+    }
+    /* Responsive design for smaller mobile screens */
+    @media (max-width: 480px) {
+      .nexbot-chat-text {
+        display: none;
+      }
+      .nexbot-chat-widget {
+        padding: 12px;
+        border-radius: 50%;
+        bottom: 16px;
+        right: 16px;
+      }
+    }
+
 @media (max-width:900px){
   .menu-list{transform:none}
   .categories{padding-left:max(16px,calc((100% - 760px)/2));padding-right:max(16px,calc((100% - 760px)/2))}
